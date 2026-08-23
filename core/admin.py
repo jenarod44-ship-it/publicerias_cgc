@@ -10,6 +10,7 @@ from .models import (
     TarifaChofer,
     MotivoNoSalida,
     OrdenTrabajo,
+    Servicio,
 )
 
 
@@ -163,6 +164,87 @@ class OrdenTrabajoAdmin(admin.ModelAdmin):
                     "chofer_base",
                     "observaciones",
                     "estado",
+                )
+            },
+        ),
+    )
+
+@admin.register(Servicio)
+class ServicioAdmin(admin.ModelAdmin):
+    list_display = (
+        "fecha",
+        "orden",
+        "publicidad",
+        "turno",
+        "camion_contratado",
+        "camion_operativo",
+        "chofer",
+        "telefono",
+        "estado",
+        "es_reposicion",
+    )
+
+    list_filter = (
+        "fecha",
+        "turno",
+        "estado",
+        "es_reposicion",
+        "perifoneo",
+    )
+
+    search_fields = (
+        "orden__folio",
+        "publicidad__nombre",
+        "camion_contratado__clave",
+        "camion_operativo__clave",
+        "chofer__nombre",
+        "telefono__clave",
+        "recorrido",
+    )
+
+    fieldsets = (
+        (
+            "Servicio programado",
+            {
+                "fields": (
+                    "orden",
+                    "fecha",
+                    "publicidad",
+                    "turno",
+                    "camion_contratado",
+                    "recorrido",
+                    "perifoneo",
+                )
+            },
+        ),
+        (
+            "Despacho",
+            {
+                "fields": (
+                    "camion_operativo",
+                    "chofer",
+                    "telefono",
+                    "hora_salida",
+                    "hora_regreso",
+                )
+            },
+        ),
+        (
+            "Resultado",
+            {
+                "fields": (
+                    "estado",
+                    "motivo_no_salida",
+                    "observaciones",
+                )
+            },
+        ),
+        (
+            "Reposición",
+            {
+                "fields": (
+                    "es_reposicion",
+                    "servicio_original",
                 )
             },
         ),

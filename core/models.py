@@ -324,3 +324,139 @@ class OrdenTrabajo(models.Model):
 
     def __str__(self):
         return f"{self.folio} - {self.publicidad}"
+
+class Servicio(models.Model):
+    ESTADOS = [
+        ("PROGRAMADO", "Programado"),
+        ("EN_SERVICIO", "En servicio"),
+        ("REALIZADO", "Realizado"),
+        ("NO_SALIO", "No salió"),
+        ("PENDIENTE_REPOSICION", "Pendiente de reposición"),
+        ("REPUESTO", "Repuesto"),
+        ("CANCELADO", "Cancelado"),
+    ]
+
+    orden = models.ForeignKey(
+        OrdenTrabajo,
+        on_delete=models.PROTECT,
+        related_name="servicios",
+        verbose_name="Orden de trabajo"
+    )
+
+    fecha = models.DateField(
+        verbose_name="Fecha del servicio"
+    )
+
+    # Datos copiados de la Orden para conservar el histórico.
+    publicidad = models.ForeignKey(
+        Publicidad,
+        on_delete=models.PROTECT,
+        related_name="servicios",
+        verbose_name="Publicidad"
+    )
+
+    turno = models.ForeignKey(
+        Turno,
+        on_delete=models.PROTECT,
+        related_name="servicios",
+        verbose_name="Turno"
+    )
+
+    camion_contratado = models.ForeignKey(
+        Camion,
+        on_delete=models.PROTECT,
+        related_name="servicios_contratados",
+        verbose_name="Camión contratado"
+    )
+
+    recorrido = models.TextField(
+        verbose_name="Recorrido"
+    )
+
+    perifoneo = models.BooleanField(
+        default=False,
+        verbose_name="Perifoneo"
+    )
+
+    # Datos reales de operación.
+    camion_operativo = models.ForeignKey(
+        Camion,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="servicios_operados",
+        verbose_name="Camión operativo"
+    )
+
+    chofer = models.ForeignKey(
+        Chofer,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="servicios",
+        verbose_name="Chofer"
+    )
+
+    telefono = models.ForeignKey(
+        Telefono,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="servicios",
+        verbose_name="Teléfono"
+    )
+
+    hora_salida = models.TimeField(
+        null=True,
+        blank=True,
+        verbose_name="Hora de salida"
+    )
+
+    hora_regreso = models.TimeField(
+        null=True,
+        blank=True,
+        verbose_name="Hora de regreso"
+    )
+
+    estado = models.CharField(
+        max_length=25,
+        choices=ESTADOS,
+        default="PROGRAMADO",
+        verbose_name="Estado"
+    )
+
+    motivo_no_salida = models.ForeignKey(
+        MotivoNoSalida,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="servicios",
+        verbose_name="Motivo de no salida"
+    )
+
+    observaciones = models.TextField(
+        blank=True,
+        verbose_name="Observaciones"
+    )
+
+    es_reposicion = models.BooleanField(
+        default=False,
+        verbose_name="Es reposición"
+    )
+
+    servicio_original = models.ForeignKey(
+        "self",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="reposiciones",
+        verbose_name="Servicio original"
+    )
+
+    class Meta:
+        verbose_name = "Servicio"
+        verbose_name_plural = "Servicios"
+        ordering = ["-fecha", "turno"]
+
+    def __str__(self):
+        return f"{self.fecha} - {self.orden.folio} - {self.turno}"
