@@ -4,6 +4,9 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from .models import Servicio
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .forms import ServicioDespachoForm
 
 
 def despacho_dia(request):
@@ -38,5 +41,27 @@ def despacho_dia(request):
     }
 
     return render(request, "core/despacho_dia.html", contexto)
+
+def editar_servicio(request, pk):
+    servicio = get_object_or_404(Servicio, pk=pk)
+
+    if request.method == "POST":
+        form = ServicioDespachoForm(request.POST, instance=servicio)
+
+        if form.is_valid():
+            form.save()
+
+            return redirect(
+                f"/despacho/?fecha={servicio.fecha:%Y-%m-%d}"
+            )
+    else:
+        form = ServicioDespachoForm(instance=servicio)
+
+    contexto = {
+        "servicio": servicio,
+        "form": form,
+    }
+
+    return render(request, "core/editar_servicio.html", contexto)
 
 

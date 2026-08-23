@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar servicio - Publicerias CGC</title>
+</head>
+
+<body>
+
+<h1>Editar servicio</h1>
+
+<p>
+    <strong>Fecha:</strong>
+    {{ servicio.fecha|date:"d/m/Y" }}
+</p>
+
+<p>
+    <strong>Turno:</strong>
+    {{ servicio.turno }}
+</p>
+
+<p>
+    <strong>Publicidad:</strong>
+    {{ servicio.publicidad }}
+</p>
+
+<p>
+    <strong>Recorrido:</strong>
+    {{ servicio.recorrido }}
+</p>
+
+<form method="post">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">
+        Guardar
+    </button>
+
+    <a href="{% url 'core:despacho_dia' %}?fecha={{ servicio.fecha|date:'Y-m-d' }}">
+        Cancelar
+    </a>
+</form>
+
+</body>
+</html>
