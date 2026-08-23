@@ -139,3 +139,40 @@ class Turno(models.Model):
 
     def __str__(self):
         return self.nombre
+
+class TarifaChofer(models.Model):
+    TIPOS = [
+        ("NORMAL", "Primer y Segundo turno"),
+        ("TERCERO", "Tercer turno"),
+    ]
+
+    tipo = models.CharField(
+        max_length=20,
+        choices=TIPOS,
+        verbose_name="Tipo de tarifa"
+    )
+    importe = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Importe"
+    )
+    fecha_inicio = models.DateField(
+        verbose_name="Vigente desde"
+    )
+    fecha_fin = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Vigente hasta"
+    )
+    activa = models.BooleanField(
+        default=True,
+        verbose_name="Activa"
+    )
+
+    class Meta:
+        verbose_name = "Tarifa de chofer"
+        verbose_name_plural = "Tarifas de chofer"
+        ordering = ["-fecha_inicio"]
+
+    def __str__(self):
+        return f"{self.get_tipo_display()} - ${self.importe}"

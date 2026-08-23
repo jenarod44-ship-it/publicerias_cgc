@@ -1,6 +1,14 @@
 from django.contrib import admin
 
-from .models import Camion, Telefono, Chofer, Ejecutivo, Publicidad, Turno
+from .models import (
+    Camion,
+    Telefono,
+    Chofer,
+    Ejecutivo,
+    Publicidad,
+    Turno,
+    TarifaChofer,
+)
 
 
 @admin.register(Camion)
@@ -45,4 +53,15 @@ class TurnoAdmin(admin.ModelAdmin):
     )
     list_filter = ("activo", "cruza_medianoche")
     search_fields = ("nombre",)
+
+@admin.register(TarifaChofer)
+class TarifaChoferAdmin(admin.ModelAdmin):
+    list_display = (
+        "tipo",
+        "importe",
+        "fecha_inicio",
+        "fecha_fin",
+        "activa",
+    )
+    list_filter = ("tipo", "activa")
 
