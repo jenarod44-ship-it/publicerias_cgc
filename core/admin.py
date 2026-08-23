@@ -8,6 +8,7 @@ from .models import (
     Publicidad,
     Turno,
     TarifaChofer,
+    MotivoNoSalida,
 )
 
 
@@ -64,4 +65,10 @@ class TarifaChoferAdmin(admin.ModelAdmin):
         "activa",
     )
     list_filter = ("tipo", "activa")
+
+@admin.register(MotivoNoSalida)
+class MotivoNoSalidaAdmin(admin.ModelAdmin):
+    list_display = ("nombre", "genera_reposicion", "activo")
+    list_filter = ("genera_reposicion", "activo")
+    search_fields = ("nombre",)
 

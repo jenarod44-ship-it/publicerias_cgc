@@ -176,3 +176,26 @@ class TarifaChofer(models.Model):
 
     def __str__(self):
         return f"{self.get_tipo_display()} - ${self.importe}"
+
+class MotivoNoSalida(models.Model):
+    nombre = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name="Motivo"
+    )
+    genera_reposicion = models.BooleanField(
+        default=True,
+        verbose_name="Genera reposición"
+    )
+    activo = models.BooleanField(
+        default=True,
+        verbose_name="Activo"
+    )
+
+    class Meta:
+        verbose_name = "Motivo de no salida"
+        verbose_name_plural = "Motivos de no salida"
+        ordering = ["nombre"]
+
+    def __str__(self):
+        return self.nombre
