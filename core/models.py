@@ -110,3 +110,32 @@ class Publicidad(models.Model):
 
     def __str__(self):
         return self.nombre
+
+class Turno(models.Model):
+    nombre = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name="Turno"
+    )
+    hora_inicio = models.TimeField(
+        verbose_name="Hora de inicio"
+    )
+    hora_fin = models.TimeField(
+        verbose_name="Hora de fin"
+    )
+    cruza_medianoche = models.BooleanField(
+        default=False,
+        verbose_name="Cruza medianoche"
+    )
+    activo = models.BooleanField(
+        default=True,
+        verbose_name="Activo"
+    )
+
+    class Meta:
+        verbose_name = "Turno"
+        verbose_name_plural = "Turnos"
+        ordering = ["hora_inicio"]
+
+    def __str__(self):
+        return self.nombre

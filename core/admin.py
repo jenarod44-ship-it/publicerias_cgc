@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Camion, Telefono, Chofer, Ejecutivo, Publicidad
+from .models import Camion, Telefono, Chofer, Ejecutivo, Publicidad, Turno
 
 
 @admin.register(Camion)
@@ -32,5 +32,17 @@ class EjecutivoAdmin(admin.ModelAdmin):
 class PublicidadAdmin(admin.ModelAdmin):
     list_display = ("nombre", "activa")
     list_filter = ("activa",)
+    search_fields = ("nombre",)
+
+@admin.register(Turno)
+class TurnoAdmin(admin.ModelAdmin):
+    list_display = (
+        "nombre",
+        "hora_inicio",
+        "hora_fin",
+        "cruza_medianoche",
+        "activo",
+    )
+    list_filter = ("activo", "cruza_medianoche")
     search_fields = ("nombre",)
 
