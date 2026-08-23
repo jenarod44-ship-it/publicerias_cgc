@@ -56,3 +56,18 @@ class ServicioDespachoForm(forms.ModelForm):
             servicio.save()
 
         return servicio
+
+class ReposicionForm(forms.ModelForm):
+    class Meta:
+        model = Servicio
+        fields = [
+            "fecha",
+            "turno",
+            "camion_operativo",
+            "chofer",
+            "observaciones",
+        ]
+        widgets = {
+            "fecha": forms.DateInput(attrs={"type": "date"}),
+            "observaciones": forms.Textarea(attrs={"rows": 3}),
+        }

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Programar reposición - Publicerias CGC</title>
+</head>
+
+<body>
+
+<h1>Programar reposición</h1>
+
+<p>
+    <strong>Servicio original:</strong>
+    {{ servicio_original }}
+</p>
+
+<p>
+    <strong>Publicidad:</strong>
+    {{ servicio_original.publicidad }}
+</p>
+
+<p>
+    <strong>Fecha original:</strong>
+    {{ servicio_original.fecha|date:"d/m/Y" }}
+</p>
+
+<p>
+    <strong>Recorrido:</strong>
+    {{ servicio_original.recorrido }}
+</p>
+
+<form method="post">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">
+        Crear reposición
+    </button>
+
+    <a href="{% url 'core:despacho_dia' %}?fecha={{ servicio_original.fecha|date:'Y-m-d' }}">
+        Cancelar
+    </a>
+</form>
+
+</body>
+</html>

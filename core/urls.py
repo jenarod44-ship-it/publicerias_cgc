@@ -16,4 +16,11 @@ urlpatterns = [
         views.editar_servicio,
         name="editar_servicio",
     ),
+    path(
+        "despacho/servicio/<int:pk>/reposicion/",
+        views.programar_reposicion,
+        name="programar_reposicion",
+    ),
 ]
+
+    

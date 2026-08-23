@@ -153,6 +153,34 @@
                     <td>
                         <a href="{% url 'core:editar_servicio' servicio.pk %}">
                             Editar
+                        {% if servicio.estado == "PENDIENTE_REPOSICION" %}
+                            <br>
+
+                            {% if servicio.reposiciones.exists %}
+                                {% with reposicion=servicio.reposiciones.first %}
+                                    <strong>
+                                        Reposición programada para:
+                                        {{ reposicion.fecha|date:"d/m/Y" }}
+                                    </strong>
+
+                                    <br>
+
+                                    <a href="{% url 'core:editar_servicio' reposicion.pk %}">
+                                        Ver reposición
+                                    </a>
+
+                                    <br>
+
+                                    <a href="{% url 'core:editar_servicio' servicio.pk %}">
+                                        Ver servicio original / causa de no salida
+                                    </a>
+                                {% endwith %}
+                            {% else %}
+                                <a href="{% url 'core:programar_reposicion' servicio.pk %}">
+                                    Programar reposición
+                                </a>
+                            {% endif %}
+                        {% endif %}
                         </a>
                     </td>
                 </tr>

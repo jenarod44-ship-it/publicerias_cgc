@@ -7,6 +7,7 @@ from .models import Servicio
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ServicioDespachoForm
+from .forms import ReposicionForm, ServicioDespachoForm
 
 
 def despacho_dia(request):
@@ -63,5 +64,61 @@ def editar_servicio(request, pk):
     }
 
     return render(request, "core/editar_servicio.html", contexto)
+
+def programar_reposicion(request, pk):
+    servicio_original = get_object_or_404(
+        Servicio,
+        pk=pk,
+        estado="PENDIENTE_REPOSICION",
+    )
+
+    if servicio_original.reposiciones.exists():
+        reposicion = servicio_original.reposiciones.first()
+
+        return redirect(
+            f"/despacho/?fecha={reposicion.fecha:%Y-%m-%d}"
+        )
+
+    if request.method == "POST":
+        form = ReposicionForm(request.POST)
+
+        if form.is_valid():
+            reposicion = form.save(commit=False)
+
+            reposicion.orden = servicio_original.orden
+            reposicion.publicidad = servicio_original.publicidad
+            reposicion.camion_contratado = servicio_original.camion_contratado
+            reposicion.recorrido = servicio_original.recorrido
+            reposicion.perifoneo = servicio_original.perifoneo
+
+            reposicion.es_reposicion = True
+            reposicion.servicio_original = servicio_original
+            reposicion.estado = "PROGRAMADO"
+
+            reposicion.save()
+
+            return redirect(
+                f"/despacho/?fecha={reposicion.fecha:%Y-%m-%d}"
+            )
+    else:
+        form = ReposicionForm(
+            initial={
+                "turno": servicio_original.turno,
+                "camion_operativo": servicio_original.camion_operativo
+                or servicio_original.camion_contratado,
+                "chofer": servicio_original.chofer,
+            }
+        )
+
+    contexto = {
+        "servicio_original": servicio_original,
+        "form": form,
+    }
+
+    return render(
+        request,
+        "core/programar_reposicion.html",
+        contexto,
+    )
 
 

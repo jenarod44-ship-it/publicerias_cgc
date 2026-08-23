@@ -29,6 +29,25 @@
     {{ servicio.recorrido }}
 </p>
 
+{% if servicio.es_reposicion and servicio.servicio_original %}
+    <p>
+        <strong>Este servicio es una reposición.</strong>
+    </p>
+
+    <p>
+        Servicio original:
+        {{ servicio.servicio_original.fecha|date:"d/m/Y" }}
+        -
+        {{ servicio.servicio_original.publicidad }}
+    </p>
+
+    <p>
+        <a href="{% url 'core:editar_servicio' servicio.servicio_original.pk %}">
+            Ver servicio original / causa de no salida
+        </a>
+    </p>
+{% endif %}
+
 <form method="post">
     {% csrf_token %}
 
