@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Despacho diario - Publicerias CGC</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        .contenedor {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .filtro {
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            vertical-align: top;
+        }
+
+        th {
+            background: #eeeeee;
+        }
+
+        .sin-servicios {
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>Despacho diario</h1>
+
+    <form method="get" class="filtro">
+        <label for="fecha">Fecha:</label>
+
+        <input
+            type="date"
+            id="fecha"
+            name="fecha"
+            value="{{ fecha|date:'Y-m-d' }}"
+        >
+
+        <button type="submit">Consultar</button>
+    </form>
+
+    <h2>
+        Servicios del {{ fecha|date:"d/m/Y" }}
+    </h2>
+
+    {% if servicios %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Turno</th>
+                    <th>Camión</th>
+                    <th>Publicidad</th>
+                    <th>Recorrido</th>
+                    <th>Chofer</th>
+                    <th>Teléfono</th>
+                    <th>Salida</th>
+                    <th>Regreso</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for servicio in servicios %}
+
+                <tr>
+                    <td>
+                        {{ servicio.turno }}
+                    </td>
+
+                    <td>
+                        {% if servicio.camion_operativo %}
+                            {{ servicio.camion_operativo }}
+                        {% else %}
+                            {{ servicio.camion_contratado }}
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ servicio.publicidad }}
+                    </td>
+
+                    <td>
+                        {{ servicio.recorrido }}
+                    </td>
+
+                    <td>
+                        {% if servicio.chofer %}
+                            {{ servicio.chofer }}
+                        {% else %}
+                            Pendiente
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if servicio.telefono %}
+                            {{ servicio.telefono.clave }}
+                        {% else %}
+                            Pendiente
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if servicio.hora_salida %}
+                            {{ servicio.hora_salida|time:"H:i" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if servicio.hora_regreso %}
+                            {{ servicio.hora_regreso|time:"H:i" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ servicio.get_estado_display }}
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+        </table>
+
+    {% else %}
+
+        <div class="sin-servicios">
+            No hay servicios programados para esta fecha.
+        </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>
