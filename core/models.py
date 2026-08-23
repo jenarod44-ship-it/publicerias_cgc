@@ -91,3 +91,22 @@ class Ejecutivo(models.Model):
 
     def __str__(self):
         return self.nombre
+
+class Publicidad(models.Model):
+    nombre = models.CharField(
+        max_length=200,
+        unique=True,
+        verbose_name="Publicidad"
+    )
+    activa = models.BooleanField(
+        default=True,
+        verbose_name="Activa"
+    )
+
+    class Meta:
+        verbose_name = "Publicidad"
+        verbose_name_plural = "Publicidades"
+        ordering = ["nombre"]
+
+    def __str__(self):
+        return self.nombre
