@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import timedelta
 
 
 class Camion(models.Model):
@@ -322,8 +323,67 @@ class OrdenTrabajo(models.Model):
         verbose_name_plural = "Órdenes de trabajo"
         ordering = ["-fecha_orden", "folio"]
 
-    def __str__(self):
-        return f"{self.folio} - {self.publicidad}"
+    def generar_servicios(self):
+        dias_activos = {
+            0: self.lunes,
+            1: self.martes,
+            2: self.miercoles,
+            3: self.jueves,
+            4: self.viernes,
+            5: self.sabado,
+            6: self.domingo,
+        }
+
+        fechas_validas = set()
+        fecha_actual = self.fecha_inicio
+
+        while fecha_actual <= self.fecha_fin:
+            if dias_activos[fecha_actual.weekday()]:
+                fechas_validas.add(fecha_actual)
+
+            fecha_actual += timedelta(days=1)
+
+        # Eliminar solamente servicios PROGRAMADOS que ya no
+        # corresponden a los días definidos en la Orden.
+        self.servicios.filter(
+            estado="PROGRAMADO",
+            es_reposicion=False,
+        ).exclude(
+            fecha__in=fechas_validas
+        ).delete()
+
+        # Crear o actualizar los servicios que sí corresponden.
+        for fecha in fechas_validas:
+            servicio, creado = Servicio.objects.get_or_create(
+                orden=self,
+                fecha=fecha,
+                es_reposicion=False,
+                defaults={
+                    "publicidad": self.publicidad,
+                    "turno": self.turno,
+                    "camion_contratado": self.camion,
+                    "camion_operativo": self.camion,
+                    "chofer": self.chofer_base,
+                    "recorrido": self.recorrido,
+                    "perifoneo": self.perifoneo,
+                    "estado": "PROGRAMADO",
+                },
+            )
+
+            # Si ya existía y todavía está PROGRAMADO,
+            # sincronizarlo con la Orden.
+            if not creado and servicio.estado == "PROGRAMADO":
+                servicio.publicidad = self.publicidad
+                servicio.turno = self.turno
+                servicio.camion_contratado = self.camion
+                servicio.camion_operativo = self.camion
+                servicio.chofer = self.chofer_base
+                servicio.recorrido = self.recorrido
+                servicio.perifoneo = self.perifoneo
+                servicio.save()
+
+        def __str__(self):
+            return f"{self.folio} - {self.publicidad}"
 
 class Servicio(models.Model):
     ESTADOS = [
@@ -456,7 +516,7 @@ class Servicio(models.Model):
     class Meta:
         verbose_name = "Servicio"
         verbose_name_plural = "Servicios"
-        ordering = ["-fecha", "turno"]
+        ordering = ["fecha", "turno"]
 
     def __str__(self):
         return f"{self.fecha} - {self.orden.folio} - {self.turno}"

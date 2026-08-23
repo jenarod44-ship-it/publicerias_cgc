@@ -169,6 +169,10 @@ class OrdenTrabajoAdmin(admin.ModelAdmin):
         ),
     )
 
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        obj.generar_servicios()
+
 @admin.register(Servicio)
 class ServicioAdmin(admin.ModelAdmin):
     list_display = (
