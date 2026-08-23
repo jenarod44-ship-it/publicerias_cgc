@@ -72,3 +72,22 @@ class Chofer(models.Model):
 
     def __str__(self):
         return self.nombre
+
+class Ejecutivo(models.Model):
+    nombre = models.CharField(
+        max_length=150,
+        unique=True,
+        verbose_name="Nombre"
+    )
+    activo = models.BooleanField(
+        default=True,
+        verbose_name="Activo"
+    )
+
+    class Meta:
+        verbose_name = "Ejecutivo de ventas"
+        verbose_name_plural = "Ejecutivos de ventas"
+        ordering = ["nombre"]
+
+    def __str__(self):
+        return self.nombre
