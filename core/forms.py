@@ -45,6 +45,8 @@ class ServicioDespachoForm(forms.ModelForm):
     def save(self, commit=True):
         servicio = super().save(commit=False)
 
+        # Si el servicio no salió y el motivo genera reposición,
+        # queda pendiente de reposición.
         if (
             servicio.estado == "NO_SALIO"
             and servicio.motivo_no_salida
@@ -54,6 +56,17 @@ class ServicioDespachoForm(forms.ModelForm):
 
         if commit:
             servicio.save()
+
+            # Si este servicio es una reposición y ya fue realizado,
+            # marcar el servicio original como REPUESTO.
+            if (
+                servicio.es_reposicion
+                and servicio.servicio_original
+                and servicio.estado == "REALIZADO"
+            ):
+                original = servicio.servicio_original
+                original.estado = "REPUESTO"
+                original.save(update_fields=["estado"])
 
         return servicio
 
