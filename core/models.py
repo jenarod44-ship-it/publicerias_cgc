@@ -53,3 +53,22 @@ class Telefono(models.Model):
 
     def __str__(self):
         return f"{self.clave} - {self.numero}"
+
+class Chofer(models.Model):
+    nombre = models.CharField(
+        max_length=150,
+        unique=True,
+        verbose_name="Nombre"
+    )
+    activo = models.BooleanField(
+        default=True,
+        verbose_name="Activo"
+    )
+
+    class Meta:
+        verbose_name = "Chofer"
+        verbose_name_plural = "Choferes"
+        ordering = ["nombre"]
+
+    def __str__(self):
+        return self.nombre
