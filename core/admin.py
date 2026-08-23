@@ -9,6 +9,7 @@ from .models import (
     Turno,
     TarifaChofer,
     MotivoNoSalida,
+    OrdenTrabajo,
 )
 
 
@@ -72,3 +73,97 @@ class MotivoNoSalidaAdmin(admin.ModelAdmin):
     list_filter = ("genera_reposicion", "activo")
     search_fields = ("nombre",)
 
+@admin.register(OrdenTrabajo)
+class OrdenTrabajoAdmin(admin.ModelAdmin):
+    list_display = (
+        "folio",
+        "fecha_orden",
+        "publicidad",
+        "ejecutivo",
+        "camion",
+        "turno",
+        "fecha_inicio",
+        "fecha_fin",
+        "estado",
+    )
+
+    list_filter = (
+        "estado",
+        "turno",
+        "perifoneo",
+        "firma_bitacora",
+        "fecha_orden",
+    )
+
+    search_fields = (
+        "folio",
+        "publicidad__nombre",
+        "ejecutivo__nombre",
+        "camion__clave",
+        "recorrido",
+    )
+
+    fieldsets = (
+        (
+            "Orden de trabajo",
+            {
+                "fields": (
+                    "folio",
+                    "fecha_orden",
+                    "publicidad",
+                    "ejecutivo",
+                    "camion",
+                    "turno",
+                )
+            },
+        ),
+        (
+            "Vigencia y días de trabajo",
+            {
+                "fields": (
+                    "fecha_inicio",
+                    "fecha_fin",
+                    (
+                        "lunes",
+                        "martes",
+                        "miercoles",
+                        "jueves",
+                        "viernes",
+                        "sabado",
+                        "domingo",
+                    ),
+                )
+            },
+        ),
+        (
+            "Condiciones del servicio",
+            {
+                "fields": (
+                    "recorrido",
+                    "perifoneo",
+                    "firma_bitacora",
+                )
+            },
+        ),
+        (
+            "Evidencias",
+            {
+                "fields": (
+                    "evidencia_ejecutivo",
+                    "evidencia_grupo_choferes",
+                    "evidencia_cliente",
+                    "referencia_cliente",
+                )
+            },
+        ),
+        (
+            "Operación",
+            {
+                "fields": (
+                    "chofer_base",
+                    "observaciones",
+                    "estado",
+                )
+            },
+        ),
+    )

@@ -199,3 +199,128 @@ class MotivoNoSalida(models.Model):
 
     def __str__(self):
         return self.nombre
+
+class OrdenTrabajo(models.Model):
+    ESTADOS = [
+        ("ACTIVA", "Activa"),
+        ("FINALIZADA", "Finalizada"),
+        ("CANCELADA", "Cancelada"),
+    ]
+
+    folio = models.CharField(
+        max_length=30,
+        unique=True,
+        verbose_name="Folio"
+    )
+
+    fecha_orden = models.DateField(
+        verbose_name="Fecha de la orden"
+    )
+
+    publicidad = models.ForeignKey(
+        Publicidad,
+        on_delete=models.PROTECT,
+        related_name="ordenes",
+        verbose_name="Publicidad"
+    )
+
+    ejecutivo = models.ForeignKey(
+        Ejecutivo,
+        on_delete=models.PROTECT,
+        related_name="ordenes",
+        verbose_name="Ejecutivo de ventas"
+    )
+
+    camion = models.ForeignKey(
+        Camion,
+        on_delete=models.PROTECT,
+        related_name="ordenes",
+        verbose_name="Camión contratado"
+    )
+
+    turno = models.ForeignKey(
+        Turno,
+        on_delete=models.PROTECT,
+        related_name="ordenes",
+        verbose_name="Turno"
+    )
+
+    fecha_inicio = models.DateField(
+        verbose_name="Fecha de inicio"
+    )
+
+    fecha_fin = models.DateField(
+        verbose_name="Fecha de fin"
+    )
+
+    lunes = models.BooleanField(default=False, verbose_name="Lunes")
+    martes = models.BooleanField(default=False, verbose_name="Martes")
+    miercoles = models.BooleanField(default=False, verbose_name="Miércoles")
+    jueves = models.BooleanField(default=False, verbose_name="Jueves")
+    viernes = models.BooleanField(default=False, verbose_name="Viernes")
+    sabado = models.BooleanField(default=False, verbose_name="Sábado")
+    domingo = models.BooleanField(default=False, verbose_name="Domingo")
+
+    recorrido = models.TextField(
+        verbose_name="Recorrido"
+    )
+
+    perifoneo = models.BooleanField(
+        default=False,
+        verbose_name="Perifoneo"
+    )
+
+    firma_bitacora = models.BooleanField(
+        default=False,
+        verbose_name="Firma de bitácora"
+    )
+
+    evidencia_ejecutivo = models.BooleanField(
+        default=True,
+        verbose_name="Enviar evidencia a ejecutivo"
+    )
+
+    evidencia_grupo_choferes = models.BooleanField(
+        default=True,
+        verbose_name="Enviar evidencia al grupo de choferes"
+    )
+
+    evidencia_cliente = models.BooleanField(
+        default=False,
+        verbose_name="Enviar evidencia al cliente"
+    )
+
+    referencia_cliente = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name="Referencia del cliente"
+    )
+
+    chofer_base = models.ForeignKey(
+        Chofer,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="ordenes_base",
+        verbose_name="Chofer asignado"
+    )
+
+    observaciones = models.TextField(
+        blank=True,
+        verbose_name="Observaciones"
+    )
+
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADOS,
+        default="ACTIVA",
+        verbose_name="Estado"
+    )
+
+    class Meta:
+        verbose_name = "Orden de trabajo"
+        verbose_name_plural = "Órdenes de trabajo"
+        ordering = ["-fecha_orden", "folio"]
+
+    def __str__(self):
+        return f"{self.folio} - {self.publicidad}"
