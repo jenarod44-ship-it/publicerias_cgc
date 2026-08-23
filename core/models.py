@@ -29,3 +29,27 @@ class Camion(models.Model):
 
     def __str__(self):
         return self.clave
+
+
+class Telefono(models.Model):
+    clave = models.CharField(
+        max_length=10,
+        unique=True,
+        verbose_name="Teléfono"
+    )
+    numero = models.CharField(
+        max_length=20,
+        verbose_name="Número telefónico"
+    )
+    activo = models.BooleanField(
+        default=True,
+        verbose_name="Activo"
+    )
+
+    class Meta:
+        verbose_name = "Teléfono"
+        verbose_name_plural = "Teléfonos"
+        ordering = ["clave"]
+
+    def __str__(self):
+        return f"{self.clave} - {self.numero}"
