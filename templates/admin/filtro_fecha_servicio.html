@@ -1,0 +1,25 @@
+<h3>Por fecha del servicio</h3>
+
+<form method="get">
+    {% for key, value in request.GET.items %}
+        {% if key != spec.parameter_name %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endif %}
+    {% endfor %}
+
+    <div style="padding: 10px 15px;">
+        <input
+            type="date"
+            name="{{ spec.parameter_name }}"
+            value="{{ spec.value|default:'' }}"
+            style="width: 100%; box-sizing: border-box;"
+        >
+
+        <div style="margin-top: 8px;">
+            <button type="submit">Filtrar</button>
+
+            <a href="?">Limpiar</a>
+        </div>
+    </div>
+</form>
+

@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django import forms
+
 
 from .models import (
     Camion,
@@ -173,6 +175,27 @@ class OrdenTrabajoAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         obj.generar_servicios()
 
+
+
+class FiltroFechaServicio(admin.SimpleListFilter):
+    title = "Fecha del servicio"
+    parameter_name = "fecha_servicio"
+
+    template = "admin/filtro_fecha_servicio.html"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("mostrar", "Mostrar"),
+        )
+
+    def queryset(self, request, queryset):
+        fecha = request.GET.get(self.parameter_name)
+
+        if fecha:
+            return queryset.filter(fecha=fecha)
+
+        return queryset
+    
 @admin.register(Servicio)
 class ServicioAdmin(admin.ModelAdmin):
     list_display = (
@@ -189,12 +212,12 @@ class ServicioAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        ("fecha", admin.DateFieldListFilter),
-        "turno",
-        "estado",
-        "es_reposicion",
-        "perifoneo",
-    )
+    FiltroFechaServicio,
+    "turno",
+    "estado",
+    "es_reposicion",
+    "perifoneo",
+)
 
     search_fields = (
         "orden__folio",
@@ -253,3 +276,4 @@ class ServicioAdmin(admin.ModelAdmin):
             },
         ),
     )
+
