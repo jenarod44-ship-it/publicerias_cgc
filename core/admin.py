@@ -189,7 +189,7 @@ class ServicioAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        "fecha",
+        ("fecha", admin.DateFieldListFilter),
         "turno",
         "estado",
         "es_reposicion",

@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import timedelta
+from django.core.exceptions import ValidationError
 
 
 class Camion(models.Model):
@@ -322,6 +323,152 @@ class OrdenTrabajo(models.Model):
         verbose_name = "Orden de trabajo"
         verbose_name_plural = "Órdenes de trabajo"
         ordering = ["-fecha_orden", "folio"]
+
+    def clean(self):
+        super().clean()
+
+        errores = {}
+
+        if self.estado == "CANCELADA":
+            return
+
+        if not (
+            self.camion_id
+            and self.turno_id
+            and self.fecha_inicio
+            and self.fecha_fin
+        ):
+            return
+
+        if self.fecha_fin < self.fecha_inicio:
+            errores["fecha_fin"] = (
+                "La fecha de fin no puede ser menor que la fecha de inicio."
+            )
+
+        dias_actuales = {
+            0: self.lunes,
+            1: self.martes,
+            2: self.miercoles,
+            3: self.jueves,
+            4: self.viernes,
+            5: self.sabado,
+            6: self.domingo,
+        }
+
+        fechas_actuales = set()
+
+        if self.fecha_inicio and self.fecha_fin:
+            fecha = self.fecha_inicio
+
+            while fecha <= self.fecha_fin:
+                if dias_actuales[fecha.weekday()]:
+                    fechas_actuales.add(fecha)
+
+                fecha += timedelta(days=1)
+
+        if not fechas_actuales:
+            if errores:
+                raise ValidationError(errores)
+            return
+
+        def obtener_conflictos(otra):
+            dias_otra = {
+                0: otra.lunes,
+                1: otra.martes,
+                2: otra.miercoles,
+                3: otra.jueves,
+                4: otra.viernes,
+                5: otra.sabado,
+                6: otra.domingo,
+            }
+
+            fecha_actual = max(self.fecha_inicio, otra.fecha_inicio)
+            fecha_limite = min(self.fecha_fin, otra.fecha_fin)
+
+            conflictos = []
+
+            while fecha_actual <= fecha_limite:
+                if (
+                    fecha_actual in fechas_actuales
+                    and dias_otra[fecha_actual.weekday()]
+                ):
+                    conflictos.append(fecha_actual)
+
+                fecha_actual += timedelta(days=1)
+
+            return conflictos
+
+        # -------------------------
+        # VALIDAR CAMIÓN
+        # -------------------------
+        otras_ordenes_camion = OrdenTrabajo.objects.filter(
+            camion=self.camion,
+            turno=self.turno,
+            fecha_inicio__lte=self.fecha_fin,
+            fecha_fin__gte=self.fecha_inicio,
+        ).exclude(
+            pk=self.pk
+        ).exclude(
+            estado="CANCELADA"
+        )
+
+        for otra in otras_ordenes_camion:
+            conflictos = obtener_conflictos(otra)
+
+            if conflictos:
+                fechas = ", ".join(
+                    fecha.strftime("%d/%m/%Y")
+                    for fecha in conflictos[:5]
+                )
+
+                if len(conflictos) > 5:
+                    fechas += ", ..."
+
+                errores["camion"] = (
+                    f"El camión {self.camion} ya está ocupado en el "
+                    f"{self.turno} por la orden {otra.folio}. "
+                    f"Fechas en conflicto: {fechas}."
+                )
+
+                break
+
+        # -------------------------
+        # VALIDAR CHOFER
+        # -------------------------
+        if self.chofer_base_id:
+            otras_ordenes_chofer = OrdenTrabajo.objects.filter(
+                chofer_base=self.chofer_base,
+                turno=self.turno,
+                fecha_inicio__lte=self.fecha_fin,
+                fecha_fin__gte=self.fecha_inicio,
+            ).exclude(
+                pk=self.pk
+            ).exclude(
+                estado="CANCELADA"
+            )
+
+            for otra in otras_ordenes_chofer:
+                conflictos = obtener_conflictos(otra)
+
+                if conflictos:
+                    fechas = ", ".join(
+                        fecha.strftime("%d/%m/%Y")
+                        for fecha in conflictos[:5]
+                    )
+
+                    if len(conflictos) > 5:
+                        fechas += ", ..."
+
+                    errores["chofer_base"] = (
+                        f"El chofer {self.chofer_base} ya está asignado "
+                        f"al {self.turno} en la orden {otra.folio}. "
+                        f"Fechas en conflicto: {fechas}."
+                    )
+
+                    break
+
+        if errores:
+            raise ValidationError(errores)
 
     def generar_servicios(self):
         dias_activos = {
