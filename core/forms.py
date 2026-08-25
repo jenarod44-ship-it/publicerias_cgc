@@ -45,6 +45,22 @@ class ServicioDespachoForm(forms.ModelForm):
     def save(self, commit=True):
         servicio = super().save(commit=False)
 
+        # Si registra hora de salida, el servicio queda en operación.
+        if (
+            servicio.hora_salida
+            and not servicio.hora_regreso
+            and servicio.estado == "PROGRAMADO"
+        ):
+            servicio.estado = "EN_SERVICIO"
+
+        # Si registra hora de regreso, el servicio queda realizado.
+        if (
+            servicio.hora_salida
+            and servicio.hora_regreso
+            and servicio.estado in ["PROGRAMADO", "EN_SERVICIO"]
+        ):
+            servicio.estado = "REALIZADO"
+
         # Si el servicio no salió y el motivo genera reposición,
         # queda pendiente de reposición.
         if (
@@ -53,6 +69,20 @@ class ServicioDespachoForm(forms.ModelForm):
             and servicio.motivo_no_salida.genera_reposicion
         ):
             servicio.estado = "PENDIENTE_REPOSICION"
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        hora_salida = cleaned_data.get("hora_salida")
+        hora_regreso = cleaned_data.get("hora_regreso")
+
+        if hora_regreso and not hora_salida:
+            self.add_error(
+                "hora_regreso",
+                "No puede registrar hora de regreso sin haber registrado la hora de salida."
+               )
+
+        return cleaned_data
 
         if commit:
             servicio.save()
