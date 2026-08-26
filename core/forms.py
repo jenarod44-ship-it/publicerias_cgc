@@ -27,25 +27,57 @@ class ServicioDespachoForm(forms.ModelForm):
 
         estado = cleaned_data.get("estado")
         motivo = cleaned_data.get("motivo_no_salida")
+        hora_salida = cleaned_data.get("hora_salida")
+        hora_regreso = cleaned_data.get("hora_regreso")
+        telefono = cleaned_data.get("telefono")
 
+        # No salida: motivo obligatorio.
         if estado in ["NO_SALIO", "PENDIENTE_REPOSICION"] and not motivo:
             self.add_error(
                 "motivo_no_salida",
                 "Debe indicar el motivo por el cual el servicio no salió.",
             )
 
+        # No debe existir motivo en un servicio normal.
         if estado not in ["NO_SALIO", "PENDIENTE_REPOSICION"] and motivo:
             self.add_error(
                 "motivo_no_salida",
                 "Solo debe indicar un motivo cuando el servicio no salió.",
             )
 
+        # No puede haber regreso sin salida.
+        if hora_regreso and not hora_salida:
+            self.add_error(
+                "hora_regreso",
+                "No puede registrar hora de regreso sin haber registrado la hora de salida.",
+            )
+
+        # El mismo teléfono no puede usarse en otro servicio
+        # de la misma fecha y turno.
+        if telefono and self.instance.fecha and self.instance.turno_id:
+            telefono_ocupado = (
+                Servicio.objects.filter(
+                    fecha=self.instance.fecha,
+                    turno=self.instance.turno,
+                    telefono=telefono,
+                )
+                .exclude(pk=self.instance.pk)
+                .exclude(estado="NO_SALIO")
+                .exists()
+            )
+
+            if telefono_ocupado:
+                self.add_error(
+                    "telefono",
+                    "Este teléfono ya está asignado a otro servicio en la misma fecha y turno.",
+                )
+
         return cleaned_data
 
     def save(self, commit=True):
         servicio = super().save(commit=False)
 
-        # Si registra hora de salida, el servicio queda en operación.
+        # Hora de salida = En servicio.
         if (
             servicio.hora_salida
             and not servicio.hora_regreso
@@ -53,7 +85,7 @@ class ServicioDespachoForm(forms.ModelForm):
         ):
             servicio.estado = "EN_SERVICIO"
 
-        # Si registra hora de regreso, el servicio queda realizado.
+        # Hora de regreso = Realizado.
         if (
             servicio.hora_salida
             and servicio.hora_regreso
@@ -61,8 +93,7 @@ class ServicioDespachoForm(forms.ModelForm):
         ):
             servicio.estado = "REALIZADO"
 
-        # Si el servicio no salió y el motivo genera reposición,
-        # queda pendiente de reposición.
+        # No salió + motivo que genera reposición.
         if (
             servicio.estado == "NO_SALIO"
             and servicio.motivo_no_salida
@@ -70,25 +101,10 @@ class ServicioDespachoForm(forms.ModelForm):
         ):
             servicio.estado = "PENDIENTE_REPOSICION"
 
-    def clean(self):
-        cleaned_data = super().clean()
-
-        hora_salida = cleaned_data.get("hora_salida")
-        hora_regreso = cleaned_data.get("hora_regreso")
-
-        if hora_regreso and not hora_salida:
-            self.add_error(
-                "hora_regreso",
-                "No puede registrar hora de regreso sin haber registrado la hora de salida."
-               )
-
-        return cleaned_data
-
         if commit:
             servicio.save()
 
-            # Si este servicio es una reposición y ya fue realizado,
-            # marcar el servicio original como REPUESTO.
+            # Reposición realizada = original Repuesto.
             if (
                 servicio.es_reposicion
                 and servicio.servicio_original
