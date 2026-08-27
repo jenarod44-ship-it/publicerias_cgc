@@ -148,7 +148,30 @@
                     </td>
 
                     <td>
-                        {{ servicio.get_estado_display }}
+                        {% if servicio.estado == "PROGRAMADO" %}
+    <strong>⚪ Programado</strong>
+
+{% elif servicio.estado == "EN_SERVICIO" %}
+    <strong>🟡 En servicio</strong>
+
+{% elif servicio.estado == "REALIZADO" %}
+    <strong>🟢 Realizado</strong>
+
+{% elif servicio.estado == "NO_SALIO" %}
+    <strong>🔴 No salió</strong>
+
+{% elif servicio.estado == "PENDIENTE_REPOSICION" %}
+    <strong>🟠 Pendiente reposición</strong>
+
+{% elif servicio.estado == "REPUESTO" %}
+    <strong>🔵 Repuesto</strong>
+
+{% elif servicio.estado == "CANCELADO" %}
+    <strong>⚫ Cancelado</strong>
+
+{% else %}
+    {{ servicio.get_estado_display }}
+{% endif %}
                     </td>
                     <td>
                         <a href="{% url 'core:editar_servicio' servicio.pk %}">
