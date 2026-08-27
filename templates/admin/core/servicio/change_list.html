@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+
+<li>
+    <a href="{% url 'admin:index' %}">
+        🏠 Volver a Administración
+    </a>
+</li>
+
+{{ block.super }}
+
+{% endblock %}

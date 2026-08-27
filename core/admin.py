@@ -277,3 +277,5 @@ class ServicioAdmin(admin.ModelAdmin):
         ),
     )
 
+    change_list_template = "admin/core/servicio/change_list.html"
+
