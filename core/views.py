@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.shortcuts import render
 from django.utils import timezone
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 
 from .models import Servicio
@@ -126,11 +126,21 @@ def programar_reposicion(request, pk):
     )
 
 def reporte_semanal_choferes(request):
-    hoy = timezone.localdate()
+    fecha_consulta = request.GET.get("fecha")
 
-    # La semana de Publicerías inicia jueves y termina miércoles.
-    dias_desde_jueves = (hoy.weekday() - 3) % 7
-    fecha_inicio = hoy - timedelta(days=dias_desde_jueves)
+    if fecha_consulta:
+        try:
+            fecha_base = datetime.strptime(
+                fecha_consulta,
+                "%Y-%m-%d"
+            ).date()
+        except ValueError:
+            fecha_base = timezone.localdate()
+    else:
+        fecha_base = timezone.localdate()
+
+    dias_desde_jueves = (fecha_base.weekday() - 3) % 7
+    fecha_inicio = fecha_base - timedelta(days=dias_desde_jueves)
     fecha_fin = fecha_inicio + timedelta(days=6)
 
     tarifa_normal = (
@@ -216,6 +226,7 @@ def reporte_semanal_choferes(request):
         "resumen": resumen.values(),
         "tarifa_normal": tarifa_normal,
         "tarifa_tercero": tarifa_tercero,
+        "fecha_base": fecha_base,
     }
 
     return render(

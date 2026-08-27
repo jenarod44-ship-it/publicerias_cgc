@@ -69,6 +69,23 @@
 
 <h1>Acumulado semanal de recorridos</h1>
 
+<form method="get" class="no-imprimir">
+    <label for="fecha">
+        <strong>Consultar semana:</strong>
+    </label>
+
+    <input
+        type="date"
+        id="fecha"
+        name="fecha"
+        value="{{ fecha_base|date:'Y-m-d' }}"
+    >
+
+    <button type="submit">
+        Consultar
+    </button>
+</form>
+
 <p>
     <strong>Periodo:</strong>
     {{ fecha_inicio|date:"d/m/Y" }}
@@ -118,11 +135,6 @@
 </tbody>
 </table>
 
-<p class="no-imprimir">
-    <a href="{% url 'core:despacho_dia' %}">
-        Volver a Despacho
-    </a>
-</p>
 
 
 </body>
