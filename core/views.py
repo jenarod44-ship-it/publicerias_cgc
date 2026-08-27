@@ -10,6 +10,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ServicioDespachoForm
 from .forms import ReposicionForm, ServicioDespachoForm
+from .models import Servicio, TarifaChofer
+from django.db import models
 
 
 def despacho_dia(request):
@@ -131,6 +133,36 @@ def reporte_semanal_choferes(request):
     fecha_inicio = hoy - timedelta(days=dias_desde_jueves)
     fecha_fin = fecha_inicio + timedelta(days=6)
 
+    tarifa_normal = (
+        TarifaChofer.objects
+        .filter(
+            tipo="NORMAL",
+            activa=True,
+            fecha_inicio__lte=fecha_fin,
+        )
+        .filter(
+            models.Q(fecha_fin__isnull=True) |
+            models.Q(fecha_fin__gte=fecha_inicio)
+        )
+        .order_by("-fecha_inicio")
+        .first()
+    )
+
+    tarifa_tercero = (
+        TarifaChofer.objects
+        .filter(
+            tipo="TERCERO",
+            activa=True,
+            fecha_inicio__lte=fecha_fin,
+        )
+        .filter(
+            models.Q(fecha_fin__isnull=True) |
+            models.Q(fecha_fin__gte=fecha_inicio)
+        )
+        .order_by("-fecha_inicio")
+        .first()
+    )
+
     servicios = (
         Servicio.objects.filter(
             fecha__range=(fecha_inicio, fecha_fin),
@@ -166,10 +198,24 @@ def reporte_semanal_choferes(request):
 
         resumen[chofer.pk]["total"] += 1
 
+        for fila in resumen.values():
+            importe_normal = tarifa_normal.importe if tarifa_normal else 0
+            importe_tercero = tarifa_tercero.importe if tarifa_tercero else 0
+
+            fila["importe_normal"] = importe_normal
+            fila["importe_tercero"] = importe_tercero
+
+            fila["total_pagar"] = (
+                (fila["primero"] + fila["segundo"]) * importe_normal
+                + fila["tercero"] * importe_tercero
+            )
+
     contexto = {
         "fecha_inicio": fecha_inicio,
         "fecha_fin": fecha_fin,
         "resumen": resumen.values(),
+        "tarifa_normal": tarifa_normal,
+        "tarifa_tercero": tarifa_tercero,
     }
 
     return render(

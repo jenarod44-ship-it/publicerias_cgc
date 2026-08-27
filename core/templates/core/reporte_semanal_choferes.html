@@ -51,26 +51,32 @@
             <th>Segundo turno</th>
             <th>Tercer turno</th>
             <th>Total recorridos</th>
+            <th>Tarifa normal</th>
+            <th>Tarifa tercero</th>
+            <th>Total a pagar</th>
         </tr>
     </thead>
 
     <tbody>
-        {% for fila in resumen %}
-        <tr>
-            <td>{{ fila.chofer }}</td>
-            <td>{{ fila.primero }}</td>
-            <td>{{ fila.segundo }}</td>
-            <td>{{ fila.tercero }}</td>
-            <td><strong>{{ fila.total }}</strong></td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5">
-                No hay recorridos realizados en este periodo.
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
+    {% for fila in resumen %}
+    <tr>
+        <td>{{ fila.chofer }}</td>
+        <td>{{ fila.primero }}</td>
+        <td>{{ fila.segundo }}</td>
+        <td>{{ fila.tercero }}</td>
+        <td><strong>{{ fila.total }}</strong></td>
+        <td>${{ fila.importe_normal }}</td>
+        <td>${{ fila.importe_tercero }}</td>
+        <td><strong>${{ fila.total_pagar }}</strong></td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="8">
+            No hay recorridos realizados en este periodo.
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
 </table>
 
 <p>
