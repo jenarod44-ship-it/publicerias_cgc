@@ -30,6 +30,8 @@ class ServicioDespachoForm(forms.ModelForm):
         hora_salida = cleaned_data.get("hora_salida")
         hora_regreso = cleaned_data.get("hora_regreso")
         telefono = cleaned_data.get("telefono")
+        camion_operativo = cleaned_data.get("camion_operativo")
+        chofer = cleaned_data.get("chofer")
 
         # No salida: motivo obligatorio.
         if estado in ["NO_SALIO", "PENDIENTE_REPOSICION"] and not motivo:
@@ -70,6 +72,60 @@ class ServicioDespachoForm(forms.ModelForm):
                 self.add_error(
                     "telefono",
                     "Este teléfono ya está asignado a otro servicio en la misma fecha y turno.",
+                )
+
+                        # El mismo camión no puede realizar dos servicios
+        # en la misma fecha y turno.
+        if camion_operativo and self.instance.fecha and self.instance.turno_id:
+            camion_ocupado = (
+                Servicio.objects.filter(
+                    fecha=self.instance.fecha,
+                    turno=self.instance.turno,
+                    camion_operativo=camion_operativo,
+                )
+                .exclude(pk=self.instance.pk)
+                .exclude(
+                    estado__in=[
+                        "NO_SALIO",
+                        "PENDIENTE_REPOSICION",
+                        "REPUESTO",
+                        "CANCELADO",
+                    ]
+                )
+                .exists()
+            )
+
+            if camion_ocupado:
+                self.add_error(
+                    "camion_operativo",
+                    "Este camión ya está asignado a otro servicio en la misma fecha y turno.",
+                )
+
+        # El mismo chofer no puede realizar dos servicios
+        # en la misma fecha y turno.
+        if chofer and self.instance.fecha and self.instance.turno_id:
+            chofer_ocupado = (
+                Servicio.objects.filter(
+                    fecha=self.instance.fecha,
+                    turno=self.instance.turno,
+                    chofer=chofer,
+                )
+                .exclude(pk=self.instance.pk)
+                .exclude(
+                    estado__in=[
+                        "NO_SALIO",
+                        "PENDIENTE_REPOSICION",
+                        "REPUESTO",
+                        "CANCELADO",
+                    ]
+                )
+                .exists()
+            )
+
+            if chofer_ocupado:
+                self.add_error(
+                    "chofer",
+                    "Este chofer ya está asignado a otro servicio en la misma fecha y turno.",
                 )
 
         return cleaned_data
