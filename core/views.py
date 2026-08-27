@@ -208,18 +208,24 @@ def reporte_semanal_choferes(request):
 
         resumen[chofer.pk]["total"] += 1
 
-        for fila in resumen.values():
-            importe_normal = tarifa_normal.importe if tarifa_normal else 0
-            importe_tercero = tarifa_tercero.importe if tarifa_tercero else 0
 
-            fila["importe_normal"] = importe_normal
-            fila["importe_tercero"] = importe_tercero
+    importe_normal = tarifa_normal.importe if tarifa_normal else 0
+    importe_tercero = tarifa_tercero.importe if tarifa_tercero else 0
 
-            fila["total_pagar"] = (
-                (fila["primero"] + fila["segundo"]) * importe_normal
-                + fila["tercero"] * importe_tercero
-            )
+    for fila in resumen.values():
+        fila["importe_normal"] = importe_normal
+        fila["importe_tercero"] = importe_tercero
 
+        fila["total_pagar"] = (
+            (fila["primero"] + fila["segundo"]) * importe_normal
+            + fila["tercero"] * importe_tercero
+        )
+
+
+    total_general = sum(
+        fila["total_pagar"]
+        for fila in resumen.values()
+)
     contexto = {
         "fecha_inicio": fecha_inicio,
         "fecha_fin": fecha_fin,
@@ -228,6 +234,7 @@ def reporte_semanal_choferes(request):
         "tarifa_normal": tarifa_normal,
         "tarifa_tercero": tarifa_tercero,
         "fecha_base": fecha_base,
+        "total_general": total_general,
     }
 
     return render(
