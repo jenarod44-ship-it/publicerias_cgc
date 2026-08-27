@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Acumulado semanal de choferes</title>
 
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,6 +30,38 @@
         td:first-child {
             text-align: left;
         }
+
+        .acciones {
+            margin: 20px 0;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 8px 14px;
+            border: 1px solid #999;
+            background: #f5f5f5;
+            color: #222;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        @media print {
+            .no-imprimir {
+                display: none !important;
+            }
+
+            body {
+                margin: 10mm;
+            }
+
+            table {
+                font-size: 11pt;
+            }
+
+            h1 {
+                margin-top: 0;
+            }
+        }
     </style>
 </head>
 
@@ -42,6 +75,12 @@
     al
     {{ fecha_fin|date:"d/m/Y" }}
 </p>
+
+<div class="acciones no-imprimir">
+    <button class="boton" onclick="window.print()">
+        🖨️ Imprimir reporte
+    </button>
+</div>
 
 <table>
     <thead>
@@ -79,11 +118,12 @@
 </tbody>
 </table>
 
-<p>
+<p class="no-imprimir">
     <a href="{% url 'core:despacho_dia' %}">
         Volver a Despacho
     </a>
 </p>
+
 
 </body>
 </html>
