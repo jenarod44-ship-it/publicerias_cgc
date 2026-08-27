@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Acumulado semanal de choferes</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+
+        td:first-child {
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Acumulado semanal de recorridos</h1>
+
+<p>
+    <strong>Periodo:</strong>
+    {{ fecha_inicio|date:"d/m/Y" }}
+    al
+    {{ fecha_fin|date:"d/m/Y" }}
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Chofer</th>
+            <th>Primer turno</th>
+            <th>Segundo turno</th>
+            <th>Tercer turno</th>
+            <th>Total recorridos</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for fila in resumen %}
+        <tr>
+            <td>{{ fila.chofer }}</td>
+            <td>{{ fila.primero }}</td>
+            <td>{{ fila.segundo }}</td>
+            <td>{{ fila.tercero }}</td>
+            <td><strong>{{ fila.total }}</strong></td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">
+                No hay recorridos realizados en este periodo.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p>
+    <a href="{% url 'core:despacho_dia' %}">
+        Volver a Despacho
+    </a>
+</p>
+
+</body>
+</html>

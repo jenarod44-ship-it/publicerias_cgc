@@ -21,6 +21,12 @@ urlpatterns = [
         views.programar_reposicion,
         name="programar_reposicion",
     ),
+
+    path(
+        "reportes/choferes/semanal/",
+        views.reporte_semanal_choferes,
+        name="reporte_semanal_choferes",
+    ),
 ]
 
     

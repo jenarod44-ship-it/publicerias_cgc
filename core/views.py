@@ -2,6 +2,8 @@ from datetime import datetime
 
 from django.shortcuts import render
 from django.utils import timezone
+from datetime import timedelta
+
 
 from .models import Servicio
 from django.shortcuts import get_object_or_404, redirect, render
@@ -118,6 +120,61 @@ def programar_reposicion(request, pk):
     return render(
         request,
         "core/programar_reposicion.html",
+        contexto,
+    )
+
+def reporte_semanal_choferes(request):
+    hoy = timezone.localdate()
+
+    # La semana de Publicerías inicia jueves y termina miércoles.
+    dias_desde_jueves = (hoy.weekday() - 3) % 7
+    fecha_inicio = hoy - timedelta(days=dias_desde_jueves)
+    fecha_fin = fecha_inicio + timedelta(days=6)
+
+    servicios = (
+        Servicio.objects.filter(
+            fecha__range=(fecha_inicio, fecha_fin),
+            estado="REALIZADO",
+            chofer__isnull=False,
+        )
+        .select_related("chofer", "turno")
+        .order_by("chofer__nombre", "fecha", "turno")
+    )
+
+    resumen = {}
+
+    for servicio in servicios:
+        chofer = servicio.chofer
+
+        if chofer.pk not in resumen:
+            resumen[chofer.pk] = {
+                "chofer": chofer,
+                "primero": 0,
+                "segundo": 0,
+                "tercero": 0,
+                "total": 0,
+            }
+
+        nombre_turno = str(servicio.turno).lower()
+
+        if "primer" in nombre_turno:
+            resumen[chofer.pk]["primero"] += 1
+        elif "segundo" in nombre_turno:
+            resumen[chofer.pk]["segundo"] += 1
+        elif "tercer" in nombre_turno:
+            resumen[chofer.pk]["tercero"] += 1
+
+        resumen[chofer.pk]["total"] += 1
+
+    contexto = {
+        "fecha_inicio": fecha_inicio,
+        "fecha_fin": fecha_fin,
+        "resumen": resumen.values(),
+    }
+
+    return render(
+        request,
+        "core/reporte_semanal_choferes.html",
         contexto,
     )
 
