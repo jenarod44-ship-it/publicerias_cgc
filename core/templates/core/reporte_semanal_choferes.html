@@ -138,6 +138,53 @@
 </tbody>
 </table>
 
+<h2>Detalle de recorridos realizados</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Chofer</th>
+            <th>Publicidad</th>
+            <th>Camión</th>
+            <th>Turno</th>
+            <th>Hora salida</th>
+            <th>Hora regreso</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for servicio in servicios %}
+        <tr>
+            <td>{{ servicio.fecha|date:"d/m/Y" }}</td>
+            <td>{{ servicio.chofer }}</td>
+            <td>{{ servicio.publicidad }}</td>
+            <td>{{ servicio.camion_operativo }}</td>
+            <td>{{ servicio.turno }}</td>
+            <td>
+                {% if servicio.hora_salida %}
+                    {{ servicio.hora_salida|time:"H:i" }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                {% if servicio.hora_regreso %}
+                    {{ servicio.hora_regreso|time:"H:i" }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">
+                No hay recorridos realizados en este periodo.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 
 </body>

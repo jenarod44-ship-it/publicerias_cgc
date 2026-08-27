@@ -224,6 +224,7 @@ def reporte_semanal_choferes(request):
         "fecha_inicio": fecha_inicio,
         "fecha_fin": fecha_fin,
         "resumen": resumen.values(),
+        "servicios": servicios,
         "tarifa_normal": tarifa_normal,
         "tarifa_tercero": tarifa_tercero,
         "fecha_base": fecha_base,
