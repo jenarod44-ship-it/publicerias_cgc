@@ -40,11 +40,23 @@ def despacho_dia(request):
         .order_by("turno__hora_inicio", "camion_contratado__clave")
     )
 
+    total_servicios = servicios.count()
+    programados = servicios.filter(estado="PROGRAMADO").count()
+    en_servicio = servicios.filter(estado="EN_SERVICIO").count()
+    realizados = servicios.filter(estado="REALIZADO").count()
+    requieren_atencion = servicios.filter(
+        estado__in=["NO_SALIO", "PENDIENTE_REPOSICION"]
+    ).count()
+
     contexto = {
         "fecha": fecha,
         "servicios": servicios,
+        "total_servicios": total_servicios,
+        "programados": programados,
+        "en_servicio": en_servicio,
+        "realizados": realizados,
+        "requieren_atencion": requieren_atencion,
     }
-
     return render(request, "core/despacho_dia.html", contexto)
 
 def editar_servicio(request, pk):

@@ -132,6 +132,18 @@
         Servicios del {{ fecha|date:"d/m/Y" }}
     </h2>
 
+        <p>
+        <strong>Total:</strong> {{ total_servicios }}
+        &nbsp; | &nbsp;
+        <strong>Programados:</strong> {{ programados }}
+        &nbsp; | &nbsp;
+        <strong>En servicio:</strong> {{ en_servicio }}
+        &nbsp; | &nbsp;
+        <strong>Realizados:</strong> {{ realizados }}
+        &nbsp; | &nbsp;
+        <strong>Requieren atención:</strong> {{ requieren_atencion }}
+    </p>
+
     {% if servicios %}
 
         <table>
