@@ -12,6 +12,10 @@ from .forms import ServicioDespachoForm
 from .forms import ReposicionForm, ServicioDespachoForm
 from .models import Servicio, TarifaChofer
 from django.db import models
+from django.http import HttpResponse
+
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment
 
 
 def despacho_dia(request):
@@ -263,3 +267,266 @@ def reporte_semanal_choferes(request):
         "core/reporte_semanal_choferes.html",
         contexto,
     )
+
+def exportar_reporte_semanal_excel(request):
+    fecha_consulta = request.GET.get("fecha")
+
+    if fecha_consulta:
+        try:
+            fecha_base = datetime.strptime(
+                fecha_consulta,
+                "%Y-%m-%d"
+            ).date()
+        except ValueError:
+            fecha_base = timezone.localdate()
+    else:
+        fecha_base = timezone.localdate()
+
+    datos = obtener_datos_reporte_semanal(fecha_base)
+
+    fecha_inicio = datos["fecha_inicio"]
+    fecha_fin = datos["fecha_fin"]
+    resumen = datos["resumen"]
+    servicios = datos["servicios"]
+    total_general = datos["total_general"]
+
+    libro = Workbook()
+
+    # =========================================================
+    # HOJA 1 - RESUMEN SEMANAL
+    # =========================================================
+    hoja_resumen = libro.active
+    hoja_resumen.title = "Resumen semanal"
+
+    hoja_resumen.merge_cells("A1:H1")
+    hoja_resumen["A1"] = "Comunicadores Gráficos Creativos"
+    hoja_resumen["A1"].font = Font(bold=True, size=14)
+    hoja_resumen["A1"].alignment = Alignment(horizontal="center")
+
+    hoja_resumen.merge_cells("A2:H2")
+    hoja_resumen["A2"] = "Acumulado semanal de recorridos"
+    hoja_resumen["A2"].font = Font(bold=True, size=12)
+    hoja_resumen["A2"].alignment = Alignment(horizontal="center")
+
+    hoja_resumen.merge_cells("A3:H3")
+    hoja_resumen["A3"] = (
+        f"Periodo: {fecha_inicio.strftime('%d/%m/%Y')} "
+        f"al {fecha_fin.strftime('%d/%m/%Y')}"
+    )
+    hoja_resumen["A3"].alignment = Alignment(horizontal="center")
+
+    encabezados = [
+        "Chofer",
+        "Primer turno",
+        "Segundo turno",
+        "Tercer turno",
+        "Total recorridos",
+        "Tarifa normal",
+        "Tarifa tercero",
+        "Total a pagar",
+    ]
+
+    fila_encabezados = 5
+
+    for columna, encabezado in enumerate(encabezados, start=1):
+        celda = hoja_resumen.cell(
+            row=fila_encabezados,
+            column=columna,
+            value=encabezado,
+        )
+        celda.font = Font(bold=True)
+        celda.alignment = Alignment(horizontal="center")
+
+    fila = fila_encabezados + 1
+
+    for registro in resumen:
+        hoja_resumen.cell(fila, 1, str(registro["chofer"]))
+        hoja_resumen.cell(fila, 2, registro["primero"])
+        hoja_resumen.cell(fila, 3, registro["segundo"])
+        hoja_resumen.cell(fila, 4, registro["tercero"])
+        hoja_resumen.cell(fila, 5, registro["total"])
+
+        celda_normal = hoja_resumen.cell(
+            fila,
+            6,
+            float(registro["importe_normal"]),
+        )
+        celda_normal.number_format = '$#,##0.00'
+
+        celda_tercero = hoja_resumen.cell(
+            fila,
+            7,
+            float(registro["importe_tercero"]),
+        )
+        celda_tercero.number_format = '$#,##0.00'
+
+        celda_total = hoja_resumen.cell(
+            fila,
+            8,
+            float(registro["total_pagar"]),
+        )
+        celda_total.number_format = '$#,##0.00'
+
+        fila += 1
+
+    hoja_resumen.cell(
+        fila + 1,
+        7,
+        "TOTAL GENERAL:",
+    ).font = Font(bold=True)
+
+    celda_total_general = hoja_resumen.cell(
+        fila + 1,
+        8,
+        float(total_general),
+    )
+    celda_total_general.font = Font(bold=True)
+    celda_total_general.number_format = '$#,##0.00'
+
+    anchos_resumen = {
+        "A": 28,
+        "B": 14,
+        "C": 15,
+        "D": 14,
+        "E": 16,
+        "F": 15,
+        "G": 15,
+        "H": 16,
+    }
+
+    for columna, ancho in anchos_resumen.items():
+        hoja_resumen.column_dimensions[columna].width = ancho
+
+    hoja_resumen.freeze_panes = "A6"
+
+    # =========================================================
+    # HOJA 2 - DETALLE DE RECORRIDOS
+    # =========================================================
+    hoja_detalle = libro.create_sheet("Detalle recorridos")
+
+    hoja_detalle.merge_cells("A1:G1")
+    hoja_detalle["A1"] = "Detalle de recorridos realizados"
+    hoja_detalle["A1"].font = Font(bold=True, size=14)
+    hoja_detalle["A1"].alignment = Alignment(horizontal="center")
+
+    hoja_detalle.merge_cells("A2:G2")
+    hoja_detalle["A2"] = (
+        f"Periodo: {fecha_inicio.strftime('%d/%m/%Y')} "
+        f"al {fecha_fin.strftime('%d/%m/%Y')}"
+    )
+    hoja_detalle["A2"].alignment = Alignment(horizontal="center")
+
+    encabezados_detalle = [
+        "Fecha",
+        "Chofer",
+        "Publicidad",
+        "Camión",
+        "Turno",
+        "Salida",
+        "Regreso",
+    ]
+
+    for columna, encabezado in enumerate(
+        encabezados_detalle,
+        start=1,
+    ):
+        celda = hoja_detalle.cell(
+            row=4,
+            column=columna,
+            value=encabezado,
+        )
+        celda.font = Font(bold=True)
+        celda.alignment = Alignment(horizontal="center")
+
+    fila = 5
+
+    for servicio in servicios:
+        celda_fecha = hoja_detalle.cell(
+            fila,
+            1,
+            servicio.fecha,
+        )
+        celda_fecha.number_format = "dd/mm/yyyy"
+
+        hoja_detalle.cell(
+            fila,
+            2,
+            str(servicio.chofer),
+        )
+
+        hoja_detalle.cell(
+            fila,
+            3,
+            str(servicio.publicidad),
+        )
+
+        camion = (
+            servicio.camion_operativo
+            or servicio.camion_contratado
+        )
+
+        hoja_detalle.cell(
+            fila,
+            4,
+            str(camion) if camion else "",
+        )
+
+        hoja_detalle.cell(
+            fila,
+            5,
+            str(servicio.turno),
+        )
+
+        celda_salida = hoja_detalle.cell(
+            fila,
+            6,
+            servicio.hora_salida,
+        )
+        if servicio.hora_salida:
+            celda_salida.number_format = "hh:mm"
+
+        celda_regreso = hoja_detalle.cell(
+            fila,
+            7,
+            servicio.hora_regreso,
+        )
+        if servicio.hora_regreso:
+            celda_regreso.number_format = "hh:mm"
+
+        fila += 1
+
+    anchos_detalle = {
+        "A": 13,
+        "B": 28,
+        "C": 30,
+        "D": 12,
+        "E": 20,
+        "F": 12,
+        "G": 12,
+    }
+
+    for columna, ancho in anchos_detalle.items():
+        hoja_detalle.column_dimensions[columna].width = ancho
+
+    hoja_detalle.freeze_panes = "A5"
+
+    nombre_archivo = (
+        f"reporte_semanal_"
+        f"{fecha_inicio.strftime('%Y%m%d')}_"
+        f"{fecha_fin.strftime('%Y%m%d')}.xlsx"
+    )
+
+    respuesta = HttpResponse(
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
+    )
+
+    respuesta["Content-Disposition"] = (
+        f'attachment; filename="{nombre_archivo}"'
+    )
+
+    libro.save(respuesta)
+
+    return respuesta

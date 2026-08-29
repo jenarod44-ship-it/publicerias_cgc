@@ -27,6 +27,12 @@ urlpatterns = [
         views.reporte_semanal_choferes,
         name="reporte_semanal_choferes",
     ),
+
+    path(
+    "reportes/choferes/semanal/excel/",
+    views.exportar_reporte_semanal_excel,
+    name="exportar_reporte_semanal_excel",
+),
 ]
 
     

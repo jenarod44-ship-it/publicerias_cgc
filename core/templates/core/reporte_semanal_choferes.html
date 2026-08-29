@@ -122,6 +122,13 @@
         🖨️ Imprimir reporte
     </button>
 
+    <a
+        href="{% url 'core:exportar_reporte_semanal_excel' %}?fecha={{ fecha_base|date:'Y-m-d' }}"
+        class="no-imprimir"
+    >
+        📊 Exportar a Excel
+    </a>
+
     <a class="boton" href="{% url 'admin:index' %}">
         🏠 Volver a Administración
     </a>
