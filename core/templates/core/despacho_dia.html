@@ -90,6 +90,16 @@
             background: #dddddd;
             color: #333333;
         }
+
+                .pendiente {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 10px;
+            background: #fff3cd;
+            color: #664d03;
+            font-weight: bold;
+            white-space: nowrap;
+        }
     </style>
 </head>
 
@@ -149,14 +159,17 @@
                         {{ servicio.turno }}
                     </td>
 
-                    <td>
-                        {% if servicio.camion_operativo %}
+                                        <td>
+                        {% if servicio.camion_operativo.clave == "PEND" %}
+                            <span class="pendiente">⚠ PEND</span>
+                        {% elif servicio.camion_operativo %}
                             {{ servicio.camion_operativo }}
+                        {% elif servicio.camion_contratado.clave == "PEND" %}
+                            <span class="pendiente">⚠ PEND</span>
                         {% else %}
                             {{ servicio.camion_contratado }}
                         {% endif %}
                     </td>
-
                     <td>
                         {{ servicio.publicidad }}
                     </td>
@@ -165,11 +178,11 @@
                         {{ servicio.recorrido }}
                     </td>
 
-                    <td>
+                                        <td>
                         {% if servicio.chofer %}
                             {{ servicio.chofer }}
                         {% else %}
-                            Pendiente
+                            <span class="pendiente">⚠ Pendiente</span>
                         {% endif %}
                     </td>
 
