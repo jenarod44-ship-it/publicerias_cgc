@@ -401,36 +401,38 @@ class OrdenTrabajo(models.Model):
         # -------------------------
         # VALIDAR CAMIÓN
         # -------------------------
-        otras_ordenes_camion = OrdenTrabajo.objects.filter(
-            camion=self.camion,
-            turno=self.turno,
-            fecha_inicio__lte=self.fecha_fin,
-            fecha_fin__gte=self.fecha_inicio,
-        ).exclude(
-            pk=self.pk
-        ).exclude(
-            estado="CANCELADA"
-        )
+        if self.camion.clave != "PEND":
+            otras_ordenes_camion = OrdenTrabajo.objects.filter(
+                camion=self.camion,
+                turno=self.turno,
+                fecha_inicio__lte=self.fecha_fin,
+                fecha_fin__gte=self.fecha_inicio,
+            ).exclude(
+                pk=self.pk
+            ).exclude(
+                estado="CANCELADA"
+            )
 
-        for otra in otras_ordenes_camion:
-            conflictos = obtener_conflictos(otra)
+            for otra in otras_ordenes_camion:
+                conflictos = obtener_conflictos(otra)
 
-            if conflictos:
-                fechas = ", ".join(
-                    fecha.strftime("%d/%m/%Y")
-                    for fecha in conflictos[:5]
-                )
+                if conflictos:
+                    fechas = ", ".join(
+                        fecha.strftime("%d/%m/%Y")
+                        for fecha in conflictos[:5]
+                    )
 
-                if len(conflictos) > 5:
-                    fechas += ", ..."
+                    if len(conflictos) > 5:
+                        fechas += ", ..."
 
-                errores["camion"] = (
-                    f"El camión {self.camion} ya está ocupado en el "
-                    f"{self.turno} por la orden {otra.folio}. "
-                    f"Fechas en conflicto: {fechas}."
-                )
+                    errores["camion"] = (
+                        f"El camión {self.camion} ya está ocupado en el "
+                        f"{self.turno} por la orden {otra.folio}. "
+                        f"Fechas en conflicto: {fechas}."
+                    )
 
-                break
+                    break
+        
 
         # -------------------------
         # VALIDAR CHOFER
