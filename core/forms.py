@@ -54,6 +54,18 @@ class ServicioDespachoForm(forms.ModelForm):
                 "No puede registrar hora de regreso sin haber registrado la hora de salida.",
             )
 
+                # PEND solo puede usarse mientras el servicio está programado.
+        # Para registrar la salida debe asignarse un camión físico.
+        if (
+            hora_salida
+            and camion_operativo
+            and camion_operativo.clave == "PEND"
+        ):
+            self.add_error(
+                "camion_operativo",
+                "Debe asignar un camión real antes de registrar la hora de salida.",
+            )
+
         # El mismo teléfono no puede usarse en otro servicio
         # de la misma fecha y turno.
         if telefono and self.instance.fecha and self.instance.turno_id:
