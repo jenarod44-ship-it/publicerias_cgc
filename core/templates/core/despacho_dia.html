@@ -46,6 +46,50 @@
             text-align: center;
             font-weight: bold;
         }
+
+                .estado {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            font-size: 13px;
+        }
+
+        .estado-programado {
+            background: #eeeeee;
+            color: #333333;
+        }
+
+        .estado-en-servicio {
+            background: #fff3cd;
+            color: #664d03;
+        }
+
+        .estado-realizado {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .estado-no-salio {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .estado-pendiente-reposicion {
+            background: #ffe5b4;
+            color: #7a3e00;
+        }
+
+        .estado-repuesto {
+            background: #cff4fc;
+            color: #055160;
+        }
+
+        .estado-cancelado {
+            background: #dddddd;
+            color: #333333;
+        }
     </style>
 </head>
 
@@ -153,31 +197,45 @@
                         {% endif %}
                     </td>
 
-                    <td>
+                                        <td>
                         {% if servicio.estado == "PROGRAMADO" %}
-    <strong>⚪ Programado</strong>
+                            <span class="estado estado-programado">
+                                ⚪ Programado
+                            </span>
 
-{% elif servicio.estado == "EN_SERVICIO" %}
-    <strong>🟡 En servicio</strong>
+                        {% elif servicio.estado == "EN_SERVICIO" %}
+                            <span class="estado estado-en-servicio">
+                                🟡 En servicio
+                            </span>
 
-{% elif servicio.estado == "REALIZADO" %}
-    <strong>🟢 Realizado</strong>
+                        {% elif servicio.estado == "REALIZADO" %}
+                            <span class="estado estado-realizado">
+                                🟢 Realizado
+                            </span>
 
-{% elif servicio.estado == "NO_SALIO" %}
-    <strong>🔴 No salió</strong>
+                        {% elif servicio.estado == "NO_SALIO" %}
+                            <span class="estado estado-no-salio">
+                                🔴 No salió
+                            </span>
 
-{% elif servicio.estado == "PENDIENTE_REPOSICION" %}
-    <strong>🟠 Pendiente reposición</strong>
+                        {% elif servicio.estado == "PENDIENTE_REPOSICION" %}
+                            <span class="estado estado-pendiente-reposicion">
+                                🟠 Pendiente reposición
+                            </span>
 
-{% elif servicio.estado == "REPUESTO" %}
-    <strong>🔵 Repuesto</strong>
+                        {% elif servicio.estado == "REPUESTO" %}
+                            <span class="estado estado-repuesto">
+                                🔵 Repuesto
+                            </span>
 
-{% elif servicio.estado == "CANCELADO" %}
-    <strong>⚫ Cancelado</strong>
+                        {% elif servicio.estado == "CANCELADO" %}
+                            <span class="estado estado-cancelado">
+                                ⚫ Cancelado
+                            </span>
 
-{% else %}
-    {{ servicio.get_estado_display }}
-{% endif %}
+                        {% else %}
+                            {{ servicio.get_estado_display }}
+                        {% endif %}
                     </td>
                     <td>
                         <a href="{% url 'core:editar_servicio' servicio.pk %}">
