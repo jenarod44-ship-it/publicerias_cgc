@@ -137,19 +137,7 @@ def programar_reposicion(request, pk):
         contexto,
     )
 
-def reporte_semanal_choferes(request):
-    fecha_consulta = request.GET.get("fecha")
-
-    if fecha_consulta:
-        try:
-            fecha_base = datetime.strptime(
-                fecha_consulta,
-                "%Y-%m-%d"
-            ).date()
-        except ValueError:
-            fecha_base = timezone.localdate()
-    else:
-        fecha_base = timezone.localdate()
+def obtener_datos_reporte_semanal(fecha_base):
 
     dias_desde_jueves = (fecha_base.weekday() - 3) % 7
     fecha_inicio = fecha_base - timedelta(days=dias_desde_jueves)
@@ -191,7 +179,12 @@ def reporte_semanal_choferes(request):
             estado="REALIZADO",
             chofer__isnull=False,
         )
-        .select_related("chofer", "turno")
+        .select_related(
+            "chofer",
+            "turno",
+            "publicidad",
+            "camion_operativo",
+        )
         .order_by("chofer__nombre", "fecha", "turno")
     )
 
@@ -220,7 +213,6 @@ def reporte_semanal_choferes(request):
 
         resumen[chofer.pk]["total"] += 1
 
-
     importe_normal = tarifa_normal.importe if tarifa_normal else 0
     importe_tercero = tarifa_tercero.importe if tarifa_tercero else 0
 
@@ -233,26 +225,41 @@ def reporte_semanal_choferes(request):
             + fila["tercero"] * importe_tercero
         )
 
-
     total_general = sum(
         fila["total_pagar"]
         for fila in resumen.values()
-)
-    contexto = {
+    )
+
+    return {
         "fecha_inicio": fecha_inicio,
         "fecha_fin": fecha_fin,
         "resumen": resumen.values(),
         "servicios": servicios,
         "tarifa_normal": tarifa_normal,
         "tarifa_tercero": tarifa_tercero,
-        "fecha_base": fecha_base,
         "total_general": total_general,
     }
+
+def reporte_semanal_choferes(request):
+    fecha_consulta = request.GET.get("fecha")
+
+    if fecha_consulta:
+        try:
+            fecha_base = datetime.strptime(
+                fecha_consulta,
+                "%Y-%m-%d"
+            ).date()
+        except ValueError:
+            fecha_base = timezone.localdate()
+    else:
+        fecha_base = timezone.localdate()
+
+    contexto = obtener_datos_reporte_semanal(fecha_base)
+
+    contexto["fecha_base"] = fecha_base
 
     return render(
         request,
         "core/reporte_semanal_choferes.html",
         contexto,
     )
-
-
