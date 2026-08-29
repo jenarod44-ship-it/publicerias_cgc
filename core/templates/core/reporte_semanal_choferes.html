@@ -50,6 +50,17 @@
                 display: none !important;
             }
 
+            .detalle-reporte {
+                break-before: page;
+                page-break-before: always;
+            }
+        }
+
+        @media print {
+            .no-imprimir {
+                display: none !important;
+            }
+
             body {
                 margin: 10mm;
             }
@@ -61,6 +72,11 @@
             h1 {
                 margin-top: 0;
             }
+        }
+
+        .detalle-reporte {
+            break-before: page;
+            page-break-before: always;
         }
     </style>
 </head>
@@ -152,9 +168,13 @@
     </strong>
 </p>
 
+<div class="detalle-reporte">
+
 <h2>Detalle de recorridos realizados</h2>
 
 <table>
+
+    <div>
     <thead>
         <tr>
             <th>Fecha</th>
