@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Servicios - Publicerias CGC</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f5f5;
+        }
+
+        .contenedor {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .encabezado {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .filtros {
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 7px;
+            vertical-align: top;
+        }
+
+        th {
+            background: #eeeeee;
+        }
+
+        .centro {
+            text-align: center;
+        }
+
+        .sin-servicios {
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <div class="encabezado">
+        <h1>Comunicadores Gráficos Creativos</h1>
+        <h2>Reporte de Servicios</h2>
+    </div>
+
+    <p>
+        <a href="{% url 'admin:index' %}">
+            🏠 Volver a Administración
+        </a>
+    </p>
+
+    <form method="get" class="filtros">
+
+        <label for="desde">
+            <strong>Desde:</strong>
+        </label>
+
+        <input
+            type="date"
+            id="desde"
+            name="desde"
+            value="{{ fecha_desde|date:'Y-m-d' }}"
+        >
+
+        &nbsp;
+
+        <label for="hasta">
+            <strong>Hasta:</strong>
+        </label>
+
+        <input
+            type="date"
+            id="hasta"
+            name="hasta"
+            value="{{ fecha_hasta|date:'Y-m-d' }}"
+        >
+
+        <button type="submit">
+            Consultar
+        </button>
+
+    </form>
+
+    <p>
+        <strong>Periodo:</strong>
+        {{ fecha_desde|date:"d/m/Y" }}
+        al
+        {{ fecha_hasta|date:"d/m/Y" }}
+
+        &nbsp; | &nbsp;
+
+        <strong>Total de servicios:</strong>
+        {{ total_servicios }}
+    </p>
+
+    {% if servicios %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Publicidad</th>
+                    <th>Camión</th>
+                    <th>Chofer</th>
+                    <th>Turno</th>
+                    <th>Recorrido</th>
+                    <th>Salida</th>
+                    <th>Regreso</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for servicio in servicios %}
+
+                    <tr>
+
+                        <td class="centro">
+                            {{ servicio.fecha|date:"d/m/Y" }}
+                        </td>
+
+                        <td>
+                            {{ servicio.publicidad }}
+                        </td>
+
+                        <td class="centro">
+                            {% if servicio.camion_operativo %}
+                                {{ servicio.camion_operativo }}
+                            {% else %}
+                                {{ servicio.camion_contratado }}
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if servicio.chofer %}
+                                {{ servicio.chofer }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ servicio.turno }}
+                        </td>
+
+                        <td>
+                            {{ servicio.recorrido }}
+                        </td>
+
+                        <td class="centro">
+                            {% if servicio.hora_salida %}
+                                {{ servicio.hora_salida|time:"H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td class="centro">
+                            {% if servicio.hora_regreso %}
+                                {{ servicio.hora_regreso|time:"H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ servicio.get_estado_display }}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+    {% else %}
+
+        <div class="sin-servicios">
+            No hay servicios en el periodo seleccionado.
+        </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>

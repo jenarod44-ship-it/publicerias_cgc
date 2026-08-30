@@ -578,3 +578,65 @@ def exportar_reporte_semanal_excel(request):
     libro.save(respuesta)
 
     return respuesta
+
+def reporte_servicios(request):
+    fecha_desde_texto = request.GET.get("desde")
+    fecha_hasta_texto = request.GET.get("hasta")
+
+    hoy = timezone.localdate()
+
+    try:
+        fecha_desde = (
+            datetime.strptime(fecha_desde_texto, "%Y-%m-%d").date()
+            if fecha_desde_texto
+            else hoy
+        )
+    except ValueError:
+        fecha_desde = hoy
+
+    try:
+        fecha_hasta = (
+            datetime.strptime(fecha_hasta_texto, "%Y-%m-%d").date()
+            if fecha_hasta_texto
+            else fecha_desde
+        )
+    except ValueError:
+        fecha_hasta = fecha_desde
+
+    if fecha_hasta < fecha_desde:
+        fecha_hasta = fecha_desde
+
+    servicios = (
+        Servicio.objects
+        .filter(
+            fecha__range=(fecha_desde, fecha_hasta)
+        )
+        .select_related(
+            "orden",
+            "publicidad",
+            "turno",
+            "camion_contratado",
+            "camion_operativo",
+            "chofer",
+            "telefono",
+            "motivo_no_salida",
+        )
+        .order_by(
+            "fecha",
+            "turno__hora_inicio",
+            "camion_contratado__clave",
+        )
+    )
+
+    contexto = {
+        "fecha_desde": fecha_desde,
+        "fecha_hasta": fecha_hasta,
+        "servicios": servicios,
+        "total_servicios": servicios.count(),
+    }
+
+    return render(
+        request,
+        "core/reporte_servicios.html",
+        contexto,
+    )
