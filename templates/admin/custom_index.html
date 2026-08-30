@@ -2,7 +2,12 @@
 
 {% block content %}
 
-<div style="margin-bottom: 25px;">
+<div style="
+    margin-bottom: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+">
     <a
         href="{% url 'core:despacho_dia' %}"
         style="
@@ -13,7 +18,6 @@
             text-decoration: none;
             border-radius: 4px;
             font-weight: bold;
-            margin-right: 10px;
         "
     >
         🚚 Despacho diario
@@ -32,6 +36,21 @@
         "
     >
         💰 Reporte semanal de choferes
+    </a>
+
+    <a
+        href="{% url 'core:reporte_servicios' %}"
+        style="
+            display: inline-block;
+            padding: 12px 20px;
+            background: #417690;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        "
+    >
+        📊 Reporte de Servicios
     </a>
 </div>
 
