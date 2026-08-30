@@ -646,3 +646,199 @@ def reporte_servicios(request):
         "core/reporte_servicios.html",
         contexto,
     )
+
+def exportar_reporte_servicios_excel(request):
+    fecha_desde_texto = request.GET.get("desde")
+    fecha_hasta_texto = request.GET.get("hasta")
+
+    hoy = timezone.localdate()
+
+    try:
+        fecha_desde = (
+            datetime.strptime(fecha_desde_texto, "%Y-%m-%d").date()
+            if fecha_desde_texto
+            else hoy
+        )
+    except ValueError:
+        fecha_desde = hoy
+
+    try:
+        fecha_hasta = (
+            datetime.strptime(fecha_hasta_texto, "%Y-%m-%d").date()
+            if fecha_hasta_texto
+            else fecha_desde
+        )
+    except ValueError:
+        fecha_hasta = fecha_desde
+
+    if fecha_hasta < fecha_desde:
+        fecha_hasta = fecha_desde
+
+    datos = obtener_datos_reporte_servicios(
+        fecha_desde,
+        fecha_hasta,
+    )
+
+    servicios = datos["servicios"]
+
+    libro = Workbook()
+    hoja = libro.active
+    hoja.title = "Servicios"
+
+    hoja.merge_cells("A1:I1")
+    hoja["A1"] = "Comunicadores Gráficos Creativos"
+    hoja["A1"].font = Font(bold=True, size=14)
+    hoja["A1"].alignment = Alignment(horizontal="center")
+
+    hoja.merge_cells("A2:I2")
+    hoja["A2"] = "Reporte de Servicios"
+    hoja["A2"].font = Font(bold=True, size=12)
+    hoja["A2"].alignment = Alignment(horizontal="center")
+
+    hoja.merge_cells("A3:I3")
+    hoja["A3"] = (
+        f"Periodo: {fecha_desde.strftime('%d/%m/%Y')} "
+        f"al {fecha_hasta.strftime('%d/%m/%Y')}"
+    )
+    hoja["A3"].alignment = Alignment(horizontal="center")
+
+    encabezados = [
+        "Fecha",
+        "Publicidad",
+        "Camión",
+        "Chofer",
+        "Turno",
+        "Recorrido",
+        "Salida",
+        "Regreso",
+        "Estado",
+    ]
+
+    for columna, encabezado in enumerate(encabezados, start=1):
+        celda = hoja.cell(
+            row=5,
+            column=columna,
+            value=encabezado,
+        )
+        celda.font = Font(bold=True)
+        celda.alignment = Alignment(horizontal="center")
+
+    fila = 6
+
+    for servicio in servicios:
+        celda_fecha = hoja.cell(
+            fila,
+            1,
+            servicio.fecha,
+        )
+        celda_fecha.number_format = "dd/mm/yyyy"
+
+        hoja.cell(
+            fila,
+            2,
+            str(servicio.publicidad),
+        )
+
+        camion = (
+            servicio.camion_operativo
+            or servicio.camion_contratado
+        )
+
+        hoja.cell(
+            fila,
+            3,
+            str(camion) if camion else "",
+        )
+
+        hoja.cell(
+            fila,
+            4,
+            str(servicio.chofer) if servicio.chofer else "",
+        )
+
+        hoja.cell(
+            fila,
+            5,
+            str(servicio.turno),
+        )
+
+        hoja.cell(
+            fila,
+            6,
+            servicio.recorrido,
+        )
+
+        celda_salida = hoja.cell(
+            fila,
+            7,
+            servicio.hora_salida,
+        )
+        if servicio.hora_salida:
+            celda_salida.number_format = "hh:mm"
+
+        celda_regreso = hoja.cell(
+            fila,
+            8,
+            servicio.hora_regreso,
+        )
+        if servicio.hora_regreso:
+            celda_regreso.number_format = "hh:mm"
+
+        hoja.cell(
+            fila,
+            9,
+            servicio.get_estado_display(),
+        )
+
+        fila += 1
+
+    hoja.cell(
+        fila + 1,
+        8,
+        "TOTAL SERVICIOS:",
+    ).font = Font(bold=True)
+
+    hoja.cell(
+        fila + 1,
+        9,
+        datos["total_servicios"],
+    ).font = Font(bold=True)
+
+    anchos = {
+        "A": 13,
+        "B": 30,
+        "C": 12,
+        "D": 28,
+        "E": 20,
+        "F": 45,
+        "G": 12,
+        "H": 12,
+        "I": 24,
+    }
+
+    for columna, ancho in anchos.items():
+        hoja.column_dimensions[columna].width = ancho
+
+    hoja.freeze_panes = "A6"
+    hoja.auto_filter.ref = f"A5:I{fila - 1}"
+
+    nombre_archivo = (
+        f"reporte_servicios_"
+        f"{fecha_desde.strftime('%Y%m%d')}_"
+        f"{fecha_hasta.strftime('%Y%m%d')}.xlsx"
+    )
+
+    respuesta = HttpResponse(
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
+    )
+
+    respuesta["Content-Disposition"] = (
+        f'attachment; filename="{nombre_archivo}"'
+    )
+
+    libro.save(respuesta)
+
+    return respuesta

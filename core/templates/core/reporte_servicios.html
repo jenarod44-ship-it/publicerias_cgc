@@ -100,6 +100,12 @@
             Consultar
         </button>
 
+        <a
+            href="{% url 'core:exportar_reporte_servicios_excel' %}?desde={{ fecha_desde|date:'Y-m-d' }}&hasta={{ fecha_hasta|date:'Y-m-d' }}"
+        >
+            📊 Exportar a Excel
+        </a>
+
     </form>
 
     <p>
