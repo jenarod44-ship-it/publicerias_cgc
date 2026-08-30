@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Despacho Diario - Publicerias CGC</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 25px;
+            color: #222;
+        }
+
+        .encabezado {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .encabezado h1 {
+            margin-bottom: 5px;
+        }
+
+        .encabezado h2 {
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+
+        .controles {
+            margin: 20px 0;
+        }
+
+        .resumen {
+            margin: 15px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th,
+        td {
+            border: 1px solid #777;
+            padding: 7px;
+            vertical-align: middle;
+        }
+
+        th {
+            background: #eeeeee;
+            text-align: center;
+        }
+
+        .centro {
+            text-align: center;
+        }
+
+        .firma {
+            margin-top: 45px;
+            text-align: center;
+        }
+
+        .linea-firma {
+            display: inline-block;
+            width: 300px;
+            border-top: 1px solid #333;
+            padding-top: 5px;
+        }
+
+        @media print {
+            .no-imprimir {
+                display: none !important;
+            }
+
+            body {
+                margin: 10px;
+            }
+
+            table {
+                font-size: 11px;
+            }
+
+            thead {
+                display: table-header-group;
+            }
+
+            tr {
+                page-break-inside: avoid;
+            }
+
+            @page {
+                size: landscape;
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="encabezado">
+        <h1>Comunicadores Gráficos Creativos</h1>
+        <h2>Reporte de Despacho Diario</h2>
+        <strong>
+            Fecha: {{ fecha|date:"d/m/Y" }}
+        </strong>
+    </div>
+
+    <div class="controles no-imprimir">
+
+        <form method="get">
+            <label for="fecha">
+                <strong>Consultar fecha:</strong>
+            </label>
+
+            <input
+                type="date"
+                id="fecha"
+                name="fecha"
+                value="{{ fecha|date:'Y-m-d' }}"
+            >
+
+            <button type="submit">
+                Consultar
+            </button>
+
+            <button
+                type="button"
+                onclick="window.print()"
+            >
+                🖨 Imprimir
+            </button>
+
+            <a href="{% url 'core:despacho_dia' %}?fecha={{ fecha|date:'Y-m-d' }}">
+                Volver a Despacho
+            </a>
+        </form>
+
+    </div>
+
+    <div class="resumen">
+        <strong>Total:</strong> {{ total_servicios }}
+        &nbsp; | &nbsp;
+
+        <strong>Programados:</strong> {{ programados }}
+        &nbsp; | &nbsp;
+
+        <strong>En servicio:</strong> {{ en_servicio }}
+        &nbsp; | &nbsp;
+
+        <strong>Realizados:</strong> {{ realizados }}
+        &nbsp; | &nbsp;
+
+        <strong>Requieren atención:</strong>
+        {{ requieren_atencion }}
+    </div>
+
+    {% if servicios %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Turno</th>
+                    <th>Camión</th>
+                    <th>Publicidad</th>
+                    <th>Recorrido</th>
+                    <th>Chofer</th>
+                    <th>Teléfono</th>
+                    <th>Salida</th>
+                    <th>Regreso</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for servicio in servicios %}
+
+                    <tr>
+                        <td>
+                            {{ servicio.turno }}
+                        </td>
+
+                        <td class="centro">
+                            {% if servicio.camion_operativo %}
+                                {{ servicio.camion_operativo }}
+                            {% else %}
+                                {{ servicio.camion_contratado }}
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ servicio.publicidad }}
+                        </td>
+
+                        <td>
+                            {{ servicio.recorrido }}
+                        </td>
+
+                        <td>
+                            {% if servicio.chofer %}
+                                {{ servicio.chofer }}
+                            {% else %}
+                                Pendiente
+                            {% endif %}
+                        </td>
+
+                        <td class="centro">
+                            {% if servicio.telefono %}
+                                {{ servicio.telefono.clave }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td class="centro">
+                            {% if servicio.hora_salida %}
+                                {{ servicio.hora_salida|time:"H:i" }}
+                            {% else %}
+                                __________
+                            {% endif %}
+                        </td>
+
+                        <td class="centro">
+                            {% if servicio.hora_regreso %}
+                                {{ servicio.hora_regreso|time:"H:i" }}
+                            {% else %}
+                                __________
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ servicio.get_estado_display }}
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+    {% else %}
+
+        <p>
+            <strong>
+                No hay servicios programados para esta fecha.
+            </strong>
+        </p>
+
+    {% endif %}
+
+    <div class="firma">
+        <span class="linea-firma">
+            Coordinador / Despachador
+        </span>
+    </div>
+
+</body>
+</html>

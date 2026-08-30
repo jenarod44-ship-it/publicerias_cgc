@@ -89,6 +89,28 @@ def despacho_dia(request):
         contexto,
     )
 
+def reporte_despacho_dia(request):
+    fecha_texto = request.GET.get("fecha")
+
+    if fecha_texto:
+        try:
+            fecha = datetime.strptime(
+                fecha_texto,
+                "%Y-%m-%d"
+            ).date()
+        except ValueError:
+            fecha = timezone.localdate()
+    else:
+        fecha = timezone.localdate()
+
+    contexto = obtener_datos_despacho(fecha)
+
+    return render(
+        request,
+        "core/reporte_despacho_dia.html",
+        contexto,
+    )
+
 def editar_servicio(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
 

@@ -29,10 +29,16 @@ urlpatterns = [
     ),
 
     path(
-    "reportes/choferes/semanal/excel/",
-    views.exportar_reporte_semanal_excel,
-    name="exportar_reporte_semanal_excel",
-),
+        "reportes/choferes/semanal/excel/",
+        views.exportar_reporte_semanal_excel,
+        name="exportar_reporte_semanal_excel",
+    ),
+
+    path(
+        "reportes/despacho/",
+        views.reporte_despacho_dia,
+        name="reporte_despacho_dia",
+    ),
 ]
 
     

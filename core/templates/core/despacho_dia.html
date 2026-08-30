@@ -115,6 +115,12 @@
         </a>
     </p>
 
+    <a
+        href="{% url 'core:reporte_despacho_dia' %}?fecha={{ fecha|date:'Y-m-d' }}"
+    >
+        📋 Reporte de Despacho
+    </a>
+
     <form method="get" class="filtro">
         <label for="fecha">Fecha:</label>
 
