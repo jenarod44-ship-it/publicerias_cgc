@@ -17,18 +17,7 @@ from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment
 
-
-def despacho_dia(request):
-    fecha_texto = request.GET.get("fecha")
-
-    if fecha_texto:
-        try:
-            fecha = datetime.strptime(fecha_texto, "%Y-%m-%d").date()
-        except ValueError:
-            fecha = timezone.localdate()
-    else:
-        fecha = timezone.localdate()
-
+def obtener_datos_despacho(fecha):
     servicios = (
         Servicio.objects
         .filter(fecha=fecha)
@@ -41,18 +30,33 @@ def despacho_dia(request):
             "chofer",
             "telefono",
         )
-        .order_by("turno__hora_inicio", "camion_contratado__clave")
+        .order_by(
+            "turno__hora_inicio",
+            "camion_contratado__clave",
+        )
     )
 
     total_servicios = servicios.count()
-    programados = servicios.filter(estado="PROGRAMADO").count()
-    en_servicio = servicios.filter(estado="EN_SERVICIO").count()
-    realizados = servicios.filter(estado="REALIZADO").count()
-    requieren_atencion = servicios.filter(
-        estado__in=["NO_SALIO", "PENDIENTE_REPOSICION"]
+    programados = servicios.filter(
+        estado="PROGRAMADO"
     ).count()
 
-    contexto = {
+    en_servicio = servicios.filter(
+        estado="EN_SERVICIO"
+    ).count()
+
+    realizados = servicios.filter(
+        estado="REALIZADO"
+    ).count()
+
+    requieren_atencion = servicios.filter(
+        estado__in=[
+            "NO_SALIO",
+            "PENDIENTE_REPOSICION",
+        ]
+    ).count()
+
+    return {
         "fecha": fecha,
         "servicios": servicios,
         "total_servicios": total_servicios,
@@ -61,7 +65,29 @@ def despacho_dia(request):
         "realizados": realizados,
         "requieren_atencion": requieren_atencion,
     }
-    return render(request, "core/despacho_dia.html", contexto)
+
+
+def despacho_dia(request):
+    fecha_texto = request.GET.get("fecha")
+
+    if fecha_texto:
+        try:
+            fecha = datetime.strptime(
+                fecha_texto,
+                "%Y-%m-%d"
+            ).date()
+        except ValueError:
+            fecha = timezone.localdate()
+    else:
+        fecha = timezone.localdate()
+
+    contexto = obtener_datos_despacho(fecha)
+
+    return render(
+        request,
+        "core/despacho_dia.html",
+        contexto,
+    )
 
 def editar_servicio(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
