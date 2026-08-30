@@ -579,6 +579,36 @@ def exportar_reporte_semanal_excel(request):
 
     return respuesta
 
+def obtener_datos_reporte_servicios(fecha_desde, fecha_hasta):
+    servicios = (
+        Servicio.objects
+        .filter(
+            fecha__range=(fecha_desde, fecha_hasta)
+        )
+        .select_related(
+            "orden",
+            "publicidad",
+            "turno",
+            "camion_contratado",
+            "camion_operativo",
+            "chofer",
+            "telefono",
+            "motivo_no_salida",
+        )
+        .order_by(
+            "fecha",
+            "turno__hora_inicio",
+            "camion_contratado__clave",
+        )
+    )
+
+    return {
+        "fecha_desde": fecha_desde,
+        "fecha_hasta": fecha_hasta,
+        "servicios": servicios,
+        "total_servicios": servicios.count(),
+    }
+
 def reporte_servicios(request):
     fecha_desde_texto = request.GET.get("desde")
     fecha_hasta_texto = request.GET.get("hasta")
@@ -606,34 +636,10 @@ def reporte_servicios(request):
     if fecha_hasta < fecha_desde:
         fecha_hasta = fecha_desde
 
-    servicios = (
-        Servicio.objects
-        .filter(
-            fecha__range=(fecha_desde, fecha_hasta)
-        )
-        .select_related(
-            "orden",
-            "publicidad",
-            "turno",
-            "camion_contratado",
-            "camion_operativo",
-            "chofer",
-            "telefono",
-            "motivo_no_salida",
-        )
-        .order_by(
-            "fecha",
-            "turno__hora_inicio",
-            "camion_contratado__clave",
-        )
+    contexto = obtener_datos_reporte_servicios(
+        fecha_desde,
+        fecha_hasta,
     )
-
-    contexto = {
-        "fecha_desde": fecha_desde,
-        "fecha_hasta": fecha_hasta,
-        "servicios": servicios,
-        "total_servicios": servicios.count(),
-    }
 
     return render(
         request,
