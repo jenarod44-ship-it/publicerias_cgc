@@ -66,6 +66,16 @@ class ServicioDespachoForm(forms.ModelForm):
                 "Debe asignar un camión real antes de registrar la hora de salida.",
             )
 
+        if (
+            hora_salida
+            and chofer
+            and chofer.nombre == "PEND"
+        ):
+            self.add_error(
+                "chofer",
+                "Debe asignar un chofer real antes de registrar la hora de salida.",
+            )
+
         # El mismo teléfono no puede usarse en otro servicio
         # de la misma fecha y turno.
         if telefono and self.instance.fecha and self.instance.turno_id:

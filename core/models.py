@@ -437,7 +437,10 @@ class OrdenTrabajo(models.Model):
         # -------------------------
         # VALIDAR CHOFER
         # -------------------------
-        if self.chofer_base_id:
+        if (
+            self.chofer_base_id
+            and self.chofer_base.nombre != "PEND"
+        ):
             otras_ordenes_chofer = OrdenTrabajo.objects.filter(
                 chofer_base=self.chofer_base,
                 turno=self.turno,
