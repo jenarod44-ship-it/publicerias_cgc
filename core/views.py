@@ -917,6 +917,7 @@ def dashboard_gerencial(request):
         "requieren_atencion": requieren_atencion,
         "total_pagar": datos_semanales["total_general"],
         "servicios_atencion": servicios_atencion,
+        "resumen_choferes": datos_semanales["resumen"],
     }
 
     return render(

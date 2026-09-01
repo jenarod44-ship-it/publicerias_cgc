@@ -158,6 +158,48 @@
 
 {% endif %}
 
+<h2>Actividad semanal por chofer</h2>
+
+{% if resumen_choferes %}
+
+<table style="
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 25px;
+">
+    <thead>
+        <tr>
+            <th>Chofer</th>
+            <th>Primer turno</th>
+            <th>Segundo turno</th>
+            <th>Tercer turno</th>
+            <th>Total recorridos</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for fila in resumen_choferes %}
+        <tr>
+            <td>{{ fila.chofer }}</td>
+            <td>{{ fila.primero }}</td>
+            <td>{{ fila.segundo }}</td>
+            <td>{{ fila.tercero }}</td>
+            <td>
+                <strong>{{ fila.total }}</strong>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+
+<p>
+    No hay recorridos realizados en esta semana.
+</p>
+
+{% endif %}
+
 <a href="/admin/">
     🏠 Volver a Administración
 </a>
