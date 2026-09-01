@@ -70,6 +70,70 @@
 
 </div>
 
+<h2>Servicios que requieren atención</h2>
+
+{% if servicios_atencion %}
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Publicidad</th>
+            <th>Camión</th>
+            <th>Chofer</th>
+            <th>Turno</th>
+            <th>Estado</th>
+            <th>Motivo</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for servicio in servicios_atencion %}
+        <tr>
+            <td>{{ servicio.fecha|date:"d/m/Y" }}</td>
+
+            <td>{{ servicio.publicidad }}</td>
+
+            <td>
+                {% if servicio.camion_operativo %}
+                    {{ servicio.camion_operativo }}
+                {% else %}
+                    {{ servicio.camion_contratado }}
+                {% endif %}
+            </td>
+
+            <td>
+                {% if servicio.chofer %}
+                    {{ servicio.chofer }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+
+            <td>{{ servicio.turno }}</td>
+
+            <td>{{ servicio.get_estado_display }}</td>
+
+            <td>
+                {% if servicio.motivo_no_salida %}
+                    {{ servicio.motivo_no_salida }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+
+<p>
+    No hay servicios que requieran atención en esta semana.
+</p>
+
+{% endif %}
+
 <a href="/admin/">
     🏠 Volver a Administración
 </a>

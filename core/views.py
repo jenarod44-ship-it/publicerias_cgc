@@ -867,6 +867,28 @@ def dashboard_gerencial(request):
         ]
     ).count()
 
+    servicios_atencion = (
+        servicios
+        .filter(
+            estado__in=[
+                "NO_SALIO",
+                "PENDIENTE_REPOSICION",
+            ]
+        )
+        .select_related(
+            "publicidad",
+            "turno",
+            "camion_operativo",
+            "camion_contratado",
+            "chofer",
+            "motivo_no_salida",
+        )
+        .order_by(
+            "fecha",
+            "turno__hora_inicio",
+        )
+    )
+
     datos_semanales = obtener_datos_reporte_semanal(hoy)
 
     contexto = {
@@ -876,6 +898,7 @@ def dashboard_gerencial(request):
         "realizados": realizados,
         "requieren_atencion": requieren_atencion,
         "total_pagar": datos_semanales["total_general"],
+        "servicios_atencion": servicios_atencion,
     }
 
     return render(
