@@ -51,6 +51,12 @@ urlpatterns = [
         views.exportar_reporte_servicios_excel,
         name="exportar_reporte_servicios_excel",
     ),
+
+    path(
+        "dashboard/",
+        views.dashboard_gerencial,
+        name="dashboard_gerencial",
+    ),
 ]
 
     

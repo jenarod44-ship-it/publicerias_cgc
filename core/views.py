@@ -842,3 +842,44 @@ def exportar_reporte_servicios_excel(request):
     libro.save(respuesta)
 
     return respuesta
+
+def dashboard_gerencial(request):
+    hoy = timezone.localdate()
+
+    dias_desde_jueves = (hoy.weekday() - 3) % 7
+    fecha_inicio = hoy - timedelta(days=dias_desde_jueves)
+    fecha_fin = fecha_inicio + timedelta(days=6)
+
+    servicios = Servicio.objects.filter(
+        fecha__range=(fecha_inicio, fecha_fin)
+    )
+
+    total_servicios = servicios.count()
+
+    realizados = servicios.filter(
+        estado="REALIZADO"
+    ).count()
+
+    requieren_atencion = servicios.filter(
+        estado__in=[
+            "NO_SALIO",
+            "PENDIENTE_REPOSICION",
+        ]
+    ).count()
+
+    datos_semanales = obtener_datos_reporte_semanal(hoy)
+
+    contexto = {
+        "fecha_inicio": fecha_inicio,
+        "fecha_fin": fecha_fin,
+        "total_servicios": total_servicios,
+        "realizados": realizados,
+        "requieren_atencion": requieren_atencion,
+        "total_pagar": datos_semanales["total_general"],
+    }
+
+    return render(
+        request,
+        "core/dashboard_gerencial.html",
+        contexto,
+    )

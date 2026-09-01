@@ -1,0 +1,77 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+
+<h1>Dashboard Gerencial</h1>
+
+<p>
+    Semana operativa:
+    <strong>
+        {{ fecha_inicio|date:"d/m/Y" }}
+        al
+        {{ fecha_fin|date:"d/m/Y" }}
+    </strong>
+</p>
+
+<div style="
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 25px 0;
+">
+
+    <div style="
+        padding: 20px;
+        min-width: 180px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    ">
+        <strong>Servicios</strong>
+        <div style="font-size: 28px;">
+            {{ total_servicios }}
+        </div>
+    </div>
+
+    <div style="
+        padding: 20px;
+        min-width: 180px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    ">
+        <strong>Realizados</strong>
+        <div style="font-size: 28px;">
+            {{ realizados }}
+        </div>
+    </div>
+
+    <div style="
+        padding: 20px;
+        min-width: 180px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    ">
+        <strong>Requieren atención</strong>
+        <div style="font-size: 28px;">
+            {{ requieren_atencion }}
+        </div>
+    </div>
+
+    <div style="
+        padding: 20px;
+        min-width: 180px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    ">
+        <strong>Pago estimado choferes</strong>
+        <div style="font-size: 28px;">
+            ${{ total_pagar|floatformat:2 }}
+        </div>
+    </div>
+
+</div>
+
+<a href="/admin/">
+    🏠 Volver a Administración
+</a>
+
+{% endblock %}
