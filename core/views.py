@@ -49,6 +49,14 @@ def obtener_datos_despacho(fecha):
         estado="REALIZADO"
     ).count()
 
+    programados = servicios.filter(
+        estado="PROGRAMADO"
+    ).count()
+
+    en_servicio = servicios.filter(
+        estado="EN_SERVICIO"
+    ).count()
+
     requieren_atencion = servicios.filter(
         estado__in=[
             "NO_SALIO",
@@ -860,6 +868,14 @@ def dashboard_gerencial(request):
         estado="REALIZADO"
     ).count()
 
+    programados = servicios.filter(
+        estado="PROGRAMADO"
+    ).count()
+
+    en_servicio = servicios.filter(
+        estado="EN_SERVICIO"
+    ).count()
+
     requieren_atencion = servicios.filter(
         estado__in=[
             "NO_SALIO",
@@ -896,6 +912,8 @@ def dashboard_gerencial(request):
         "fecha_fin": fecha_fin,
         "total_servicios": total_servicios,
         "realizados": realizados,
+        "programados": programados,
+        "en_servicio": en_servicio,
         "requieren_atencion": requieren_atencion,
         "total_pagar": datos_semanales["total_general"],
         "servicios_atencion": servicios_atencion,
