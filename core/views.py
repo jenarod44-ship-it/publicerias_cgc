@@ -116,6 +116,14 @@ def puede_ver_dashboard(user):
         ).exists()
     )
 
+def puede_ver_reportes(user):
+    return (
+        user.is_superuser
+        or user.groups.filter(
+            name__in=["Administrador", "Coordinador", "Gerencia"]
+        ).exists()
+    )
+
 @login_required
 def reporte_despacho_dia(request):
     fecha_texto = request.GET.get("fecha")
@@ -637,6 +645,7 @@ def obtener_datos_reporte_servicios(fecha_desde, fecha_hasta):
         "total_servicios": servicios.count(),
     }
 @login_required
+@user_passes_test(puede_ver_reportes)
 def reporte_servicios(request):
     fecha_desde_texto = request.GET.get("desde")
     fecha_hasta_texto = request.GET.get("hasta")
@@ -675,6 +684,8 @@ def reporte_servicios(request):
         contexto,
     )
 
+@login_required
+@user_passes_test(puede_ver_reportes)
 def exportar_reporte_servicios_excel(request):
     fecha_desde_texto = request.GET.get("desde")
     fecha_hasta_texto = request.GET.get("hasta")
