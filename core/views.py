@@ -97,7 +97,7 @@ def despacho_dia(request):
         "core/despacho_dia.html",
         contexto,
     )
-
+@login_required
 def reporte_despacho_dia(request):
     fecha_texto = request.GET.get("fecha")
 
@@ -119,7 +119,7 @@ def reporte_despacho_dia(request):
         "core/reporte_despacho_dia.html",
         contexto,
     )
-
+@login_required
 def editar_servicio(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
 
@@ -141,7 +141,7 @@ def editar_servicio(request, pk):
     }
 
     return render(request, "core/editar_servicio.html", contexto)
-
+@login_required
 def programar_reposicion(request, pk):
     servicio_original = get_object_or_404(
         Servicio,
@@ -300,7 +300,7 @@ def obtener_datos_reporte_semanal(fecha_base):
         "tarifa_tercero": tarifa_tercero,
         "total_general": total_general,
     }
-
+@login_required
 def reporte_semanal_choferes(request):
     fecha_consulta = request.GET.get("fecha")
 
@@ -324,7 +324,7 @@ def reporte_semanal_choferes(request):
         "core/reporte_semanal_choferes.html",
         contexto,
     )
-
+@login_required
 def exportar_reporte_semanal_excel(request):
     fecha_consulta = request.GET.get("fecha")
 
@@ -617,7 +617,7 @@ def obtener_datos_reporte_servicios(fecha_desde, fecha_hasta):
         "servicios": servicios,
         "total_servicios": servicios.count(),
     }
-
+@login_required
 def reporte_servicios(request):
     fecha_desde_texto = request.GET.get("desde")
     fecha_hasta_texto = request.GET.get("hasta")
