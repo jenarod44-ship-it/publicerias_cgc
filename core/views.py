@@ -148,6 +148,7 @@ def reporte_despacho_dia(request):
         contexto,
     )
 @login_required
+@user_passes_test(puede_usar_despacho)
 def editar_servicio(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
 
@@ -169,7 +170,10 @@ def editar_servicio(request, pk):
     }
 
     return render(request, "core/editar_servicio.html", contexto)
+
+
 @login_required
+@user_passes_test(puede_usar_despacho)
 def programar_reposicion(request, pk):
     servicio_original = get_object_or_404(
         Servicio,
