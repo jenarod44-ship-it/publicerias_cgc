@@ -8,7 +8,7 @@
     flex-wrap: wrap;
     gap: 10px;
 ">
-
+{% if user.is_superuser or user.groups.all.0.name == "Administrador" or user.groups.all.0.name == "Coordinador" or user.groups.all.0.name == "Gerencia" %}
     <a
         href="{% url 'core:dashboard_gerencial' %}"
         style="
@@ -23,7 +23,9 @@
     >
         📈 Dashboard Gerencial
     </a>
-    
+    {% endif %}
+
+    {% if user.is_superuser or user.groups.all.0.name == "Administrador" or user.groups.all.0.name == "Coordinador" or user.groups.all.0.name == "Despachador" %}
     <a
         href="{% url 'core:despacho_dia' %}"
         style="
@@ -38,7 +40,8 @@
     >
         🚚 Despacho diario
     </a>
-
+    {% endif %}
+    {% if user.is_superuser or user.groups.all.0.name == "Administrador" or user.groups.all.0.name == "Coordinador" or user.groups.all.0.name == "Gerencia" %}
     <a
         href="{% url 'core:reporte_semanal_choferes' %}"
         style="
@@ -53,7 +56,9 @@
     >
         💰 Reporte semanal de choferes
     </a>
+    {% endif %}
 
+    {% if user.is_superuser or user.groups.all.0.name == "Administrador" or user.groups.all.0.name == "Coordinador" or user.groups.all.0.name == "Gerencia" %}
     <a
         href="{% url 'core:reporte_servicios' %}"
         style="
@@ -68,6 +73,7 @@
     >
         📊 Reporte de Servicios
     </a>
+    {% endif %}
 </div>
 
 {{ block.super }}
