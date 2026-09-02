@@ -125,6 +125,7 @@ def puede_ver_reportes(user):
     )
 
 @login_required
+@user_passes_test(puede_usar_despacho)
 def reporte_despacho_dia(request):
     fecha_texto = request.GET.get("fecha")
 
