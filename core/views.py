@@ -16,6 +16,7 @@ from django.http import HttpResponse
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment
+from django.contrib.auth.decorators import login_required
 
 def obtener_datos_despacho(fecha):
     servicios = (
@@ -74,7 +75,7 @@ def obtener_datos_despacho(fecha):
         "requieren_atencion": requieren_atencion,
     }
 
-
+@login_required
 def despacho_dia(request):
     fecha_texto = request.GET.get("fecha")
 
@@ -851,6 +852,8 @@ def exportar_reporte_servicios_excel(request):
 
     return respuesta
 
+
+@login_required
 def dashboard_gerencial(request):
     hoy = timezone.localdate()
 
