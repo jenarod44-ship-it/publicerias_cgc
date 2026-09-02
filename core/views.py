@@ -328,6 +328,7 @@ def obtener_datos_reporte_semanal(fecha_base):
         "total_general": total_general,
     }
 @login_required
+@user_passes_test(puede_ver_reportes)
 def reporte_semanal_choferes(request):
     fecha_consulta = request.GET.get("fecha")
 
@@ -352,6 +353,7 @@ def reporte_semanal_choferes(request):
         contexto,
     )
 @login_required
+@user_passes_test(puede_ver_reportes)
 def exportar_reporte_semanal_excel(request):
     fecha_consulta = request.GET.get("fecha")
 
