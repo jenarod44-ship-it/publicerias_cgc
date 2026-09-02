@@ -107,6 +107,15 @@ def despacho_dia(request):
         "core/despacho_dia.html",
         contexto,
     )
+
+def puede_ver_dashboard(user):
+    return (
+        user.is_superuser
+        or user.groups.filter(
+            name__in=["Administrador", "Coordinador", "Gerencia"]
+        ).exists()
+    )
+
 @login_required
 def reporte_despacho_dia(request):
     fecha_texto = request.GET.get("fecha")
@@ -864,6 +873,7 @@ def exportar_reporte_servicios_excel(request):
 
 
 @login_required
+@user_passes_test(puede_ver_dashboard)
 def dashboard_gerencial(request):
     hoy = timezone.localdate()
 
