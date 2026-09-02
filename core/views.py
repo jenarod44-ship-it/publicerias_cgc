@@ -17,6 +17,15 @@ from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test
+
+def puede_usar_despacho(user):
+    return (
+        user.is_superuser
+        or user.groups.filter(
+            name__in=["Administrador", "Coordinador", "Despachador"]
+        ).exists()
+    )
 
 def obtener_datos_despacho(fecha):
     servicios = (
@@ -76,6 +85,7 @@ def obtener_datos_despacho(fecha):
     }
 
 @login_required
+@user_passes_test(puede_usar_despacho)
 def despacho_dia(request):
     fecha_texto = request.GET.get("fecha")
 
