@@ -11,6 +11,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
+import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -76,14 +77,14 @@ WSGI_APPLICATION = 'publicerias_cgc.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "publicerias_cgc",
-        "USER": "publicerias_user",
-        "PASSWORD": os.environ.get("PUBLICERIAS_DB_PASSWORD"),
-        "HOST": "localhost",
-        "PORT": "5432",
-    }
+    "default": dj_database_url.config(
+        default=(
+            f"postgresql://publicerias_user:"
+            f"{os.environ.get('PUBLICERIAS_DB_PASSWORD', '')}"
+            f"@localhost:5432/publicerias_cgc"
+        ),
+        conn_max_age=600,
+    )
 }
 
 # Password validation
