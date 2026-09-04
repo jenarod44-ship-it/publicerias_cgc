@@ -490,6 +490,22 @@ def exportar_reporte_semanal_excel(request):
 
     hoja_resumen.freeze_panes = "A6"
 
+    # Configuración de impresión
+    hoja_resumen.page_setup.orientation = "landscape"
+    hoja_resumen.page_setup.paperSize = hoja_resumen.PAPERSIZE_LETTER
+
+    hoja_resumen.sheet_properties.pageSetUpPr.fitToPage = True
+    hoja_resumen.page_setup.fitToWidth = 1
+    hoja_resumen.page_setup.fitToHeight = 0
+
+    hoja_resumen.page_margins.left = 0.25
+    hoja_resumen.page_margins.right = 0.25
+    hoja_resumen.page_margins.top = 0.40
+    hoja_resumen.page_margins.bottom = 0.40
+
+    hoja_resumen.print_area = f"A1:H{fila + 1}"
+    hoja_resumen.print_options.horizontalCentered = True
+
     # =========================================================
     # HOJA 2 - DETALLE DE RECORRIDOS
     # =========================================================
@@ -600,6 +616,22 @@ def exportar_reporte_semanal_excel(request):
         hoja_detalle.column_dimensions[columna].width = ancho
 
     hoja_detalle.freeze_panes = "A5"
+
+    # Configuración de impresión del detalle
+    hoja_detalle.page_setup.orientation = "landscape"
+    hoja_detalle.page_setup.paperSize = hoja_detalle.PAPERSIZE_LETTER
+
+    hoja_detalle.sheet_properties.pageSetUpPr.fitToPage = True
+    hoja_detalle.page_setup.fitToWidth = 1
+    hoja_detalle.page_setup.fitToHeight = 0
+
+    hoja_detalle.page_margins.left = 0.25
+    hoja_detalle.page_margins.right = 0.25
+    hoja_detalle.page_margins.top = 0.40
+    hoja_detalle.page_margins.bottom = 0.40
+
+    hoja_detalle.print_area = f"A1:G{fila - 1}"
+    hoja_detalle.print_options.horizontalCentered = True
 
     nombre_archivo = (
         f"reporte_semanal_"
