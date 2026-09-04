@@ -1,58 +1,144 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Despacho Diario - Publicerias CGC</title>
+
+    <title>
+        Reporte de Despacho Diario - Publicerias CGC
+    </title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 25px;
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 24px;
             color: #222;
+            background: #fff;
         }
 
         .encabezado {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
+        }
+
+        .encabezado img {
+            width: 150px;
+            height: auto;
+            margin-bottom: 8px;
         }
 
         .encabezado h1 {
-            margin-bottom: 5px;
+            margin: 0;
+            font-size: 24px;
+            color: #24475b;
         }
 
         .encabezado h2 {
-            margin-top: 0;
-            margin-bottom: 5px;
+            margin: 4px 0 0 0;
+            font-size: 18px;
+            font-weight: normal;
+            color: #444;
         }
 
-        .controles {
-            margin: 20px 0;
+        .fecha-reporte {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .barra-consulta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin: 18px 0;
+            padding: 14px;
+            border: 1px solid #d6d6d6;
+            border-radius: 6px;
+            background: #f8f8f8;
+        }
+
+        .barra-consulta label {
+            font-weight: bold;
+        }
+
+        .barra-consulta input {
+            padding: 7px 9px;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 4px;
+            background: #417690;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .boton:hover {
+            background: #31596d;
         }
 
         .resumen {
-            margin: 15px 0;
+            margin: 10px 0 16px 0;
+            padding: 10px 14px;
+            border-left: 4px solid #417690;
+            background: #f3f7f9;
+            font-size: 14px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 13px;
+            table-layout: auto;
         }
 
         th,
         td {
-            border: 1px solid #777;
-            padding: 7px;
+            border: 1px solid #bdbdbd;
+            padding: 6px 5px;
             vertical-align: middle;
+            font-size: 12px;
         }
 
         th {
-            background: #eeeeee;
+            background: #417690;
+            color: white;
             text-align: center;
+            font-weight: bold;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f7f7f7;
         }
 
         .centro {
             text-align: center;
+        }
+
+        .sin-servicios {
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            background: #f8f8f8;
         }
 
         .firma {
@@ -65,6 +151,12 @@
             width: 300px;
             border-top: 1px solid #333;
             padding-top: 5px;
+            font-size: 12px;
+        }
+
+        @page {
+            size: letter landscape;
+            margin: 8mm;
         }
 
         @media print {
@@ -73,11 +165,44 @@
             }
 
             body {
-                margin: 10px;
+                margin: 0;
+            }
+
+            .encabezado {
+                margin-bottom: 10px;
+            }
+
+            .encabezado img {
+                width: 105px;
+            }
+
+            .encabezado h1 {
+                font-size: 18px;
+            }
+
+            .encabezado h2 {
+                font-size: 14px;
+            }
+
+            .fecha-reporte {
+                font-size: 10px;
+            }
+
+            .resumen {
+                margin: 6px 0 10px 0;
+                padding: 6px 8px;
+                font-size: 10px;
             }
 
             table {
-                font-size: 11px;
+                width: 100%;
+                table-layout: auto;
+            }
+
+            th,
+            td {
+                padding: 3px 3px;
+                font-size: 8px;
             }
 
             thead {
@@ -85,12 +210,16 @@
             }
 
             tr {
+                break-inside: avoid;
                 page-break-inside: avoid;
             }
 
-            @page {
-                size: landscape;
-                margin: 10mm;
+            .firma {
+                margin-top: 30px;
+            }
+
+            .linea-firma {
+                font-size: 10px;
             }
         }
     </style>
@@ -99,65 +228,110 @@
 <body>
 
     <div class="encabezado">
-        <h1>Comunicadores Gráficos Creativos</h1>
-        <h2>Reporte de Despacho Diario</h2>
-        <strong>
-            Fecha: {{ fecha|date:"d/m/Y" }}
-        </strong>
-    </div>
 
-    <div class="controles no-imprimir">
+        <img
+            src="{% static 'core/img/logo_cgc.png' %}"
+            alt="Comunicadores Gráficos Creativos"
+        >
 
-        <form method="get">
-            <label for="fecha">
-                <strong>Consultar fecha:</strong>
-            </label>
+        <h1>
+            Comunicadores Gráficos Creativos
+        </h1>
 
-            <input
-                type="date"
-                id="fecha"
-                name="fecha"
-                value="{{ fecha|date:'Y-m-d' }}"
-            >
+        <h2>
+            Reporte de Despacho Diario
+        </h2>
 
-            <button type="submit">
-                Consultar
-            </button>
-
-            <button
-                type="button"
-                onclick="window.print()"
-            >
-                🖨 Imprimir
-            </button>
-
-            <a href="{% url 'core:despacho_dia' %}?fecha={{ fecha|date:'Y-m-d' }}">
-                Volver a Despacho
-            </a>
-        </form>
+        <div class="fecha-reporte">
+            Fecha:
+            {{ fecha|date:"d/m/Y" }}
+        </div>
 
     </div>
+
+
+    <form method="get" class="barra-consulta no-imprimir">
+
+        <label for="fecha">
+            Consultar fecha:
+        </label>
+
+        <input
+            type="date"
+            id="fecha"
+            name="fecha"
+            value="{{ fecha|date:'Y-m-d' }}"
+        >
+
+        <button
+            type="submit"
+            class="boton"
+        >
+            Consultar
+        </button>
+
+    </form>
+
+
+    <div class="acciones no-imprimir">
+
+        <button
+            type="button"
+            class="boton"
+            onclick="window.print()"
+        >
+            🖨 Imprimir reporte
+        </button>
+
+        <a
+            href="{% url 'core:despacho_dia' %}?fecha={{ fecha|date:'Y-m-d' }}"
+            class="boton"
+        >
+            ← Volver a Despacho
+        </a>
+
+        <a
+            href="{% url 'admin:index' %}"
+            class="boton"
+        >
+            🏠 Administración
+        </a>
+
+    </div>
+
 
     <div class="resumen">
-        <strong>Total:</strong> {{ total_servicios }}
+
+        <strong>Total:</strong>
+        {{ total_servicios }}
+
         &nbsp; | &nbsp;
 
-        <strong>Programados:</strong> {{ programados }}
+        <strong>Programados:</strong>
+        {{ programados }}
+
         &nbsp; | &nbsp;
 
-        <strong>En servicio:</strong> {{ en_servicio }}
+        <strong>En servicio:</strong>
+        {{ en_servicio }}
+
         &nbsp; | &nbsp;
 
-        <strong>Realizados:</strong> {{ realizados }}
+        <strong>Realizados:</strong>
+        {{ realizados }}
+
         &nbsp; | &nbsp;
 
         <strong>Requieren atención:</strong>
         {{ requieren_atencion }}
+
     </div>
+
 
     {% if servicios %}
 
         <table>
+
             <thead>
                 <tr>
                     <th>Turno</th>
@@ -177,6 +351,7 @@
                 {% for servicio in servicios %}
 
                     <tr>
+
                         <td>
                             {{ servicio.turno }}
                         </td>
@@ -232,22 +407,23 @@
                         <td>
                             {{ servicio.get_estado_display }}
                         </td>
+
                     </tr>
 
                 {% endfor %}
 
             </tbody>
+
         </table>
 
     {% else %}
 
-        <p>
-            <strong>
-                No hay servicios programados para esta fecha.
-            </strong>
-        </p>
+        <div class="sin-servicios">
+            No hay servicios programados para esta fecha.
+        </div>
 
     {% endif %}
+
 
     <div class="firma">
         <span class="linea-firma">
