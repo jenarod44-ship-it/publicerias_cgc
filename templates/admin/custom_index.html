@@ -97,6 +97,260 @@
 
 </div>
 
-{{ block.super }}
+<div style="
+    width: calc(100vw - 80px);
+    max-width: 1200px;
+    margin: 0 auto 35px auto;
+">
 
+    <h2 style="
+        margin: 5px 0 20px 0;
+        text-align: center;
+        color: #24475b;
+        font-size: 21px;
+    ">
+        Administración del sistema
+    </h2>
+
+
+    <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+        align-items: start;
+    ">
+
+        <!-- ========================================== -->
+        <!-- OPERACIÓN -->
+        <!-- ========================================== -->
+
+        <div style="
+            background: white;
+            border: 1px solid #d8d8d8;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        ">
+
+            <div style="
+                background: #417690;
+                color: white;
+                padding: 11px 15px;
+                font-weight: bold;
+                font-size: 15px;
+            ">
+                🚚 Operación
+            </div>
+
+            <div style="padding: 8px 15px;">
+
+                {% for app in app_list %}
+                    {% for model in app.models %}
+
+                        {% if model.object_name == "OrdenTrabajo" or model.object_name == "Servicio" %}
+
+                            <div style="
+                                padding: 10px 0;
+                                border-bottom: 1px solid #eeeeee;
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                gap: 10px;
+                            ">
+
+                                <a
+                                    href="{{ model.admin_url }}"
+                                    style="
+                                        color: #24475b;
+                                        text-decoration: none;
+                                        font-weight: bold;
+                                    "
+                                >
+                                    {{ model.name }}
+                                </a>
+
+                                {% if model.add_url %}
+                                    <a
+                                        href="{{ model.add_url }}"
+                                        style="
+                                            color: #417690;
+                                            text-decoration: none;
+                                            white-space: nowrap;
+                                            font-size: 12px;
+                                        "
+                                    >
+                                        ＋ Añadir
+                                    </a>
+                                {% endif %}
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================== -->
+        <!-- CATÁLOGOS -->
+        <!-- ========================================== -->
+
+        <div style="
+            background: white;
+            border: 1px solid #d8d8d8;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        ">
+
+            <div style="
+                background: #417690;
+                color: white;
+                padding: 11px 15px;
+                font-weight: bold;
+                font-size: 15px;
+            ">
+                📚 Catálogos
+            </div>
+
+            <div style="padding: 8px 15px;">
+
+                {% for app in app_list %}
+                    {% for model in app.models %}
+
+                        {% if model.object_name != "OrdenTrabajo" and model.object_name != "Servicio" and model.object_name != "User" and model.object_name != "Group" %}
+
+                            <div style="
+                                padding: 10px 0;
+                                border-bottom: 1px solid #eeeeee;
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                gap: 10px;
+                            ">
+
+                                <a
+                                    href="{{ model.admin_url }}"
+                                    style="
+                                        color: #24475b;
+                                        text-decoration: none;
+                                        font-weight: bold;
+                                    "
+                                >
+                                    {{ model.name }}
+                                </a>
+
+                                {% if model.add_url %}
+                                    <a
+                                        href="{{ model.add_url }}"
+                                        style="
+                                            color: #417690;
+                                            text-decoration: none;
+                                            white-space: nowrap;
+                                            font-size: 12px;
+                                        "
+                                    >
+                                        ＋ Añadir
+                                    </a>
+                                {% endif %}
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================== -->
+        <!-- SEGURIDAD -->
+        <!-- Solo aparece si Django dio esos permisos -->
+        <!-- ========================================== -->
+
+        {% for app in app_list %}
+            {% if app.app_label == "auth" %}
+
+                <div style="
+                    background: white;
+                    border: 1px solid #d8d8d8;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+                ">
+
+                    <div style="
+                        background: #417690;
+                        color: white;
+                        padding: 11px 15px;
+                        font-weight: bold;
+                        font-size: 15px;
+                    ">
+                        🔐 Seguridad
+                    </div>
+
+                    <div style="padding: 8px 15px;">
+
+                        {% for model in app.models %}
+
+                            <div style="
+                                padding: 10px 0;
+                                border-bottom: 1px solid #eeeeee;
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                gap: 10px;
+                            ">
+
+                                <a
+                                    href="{{ model.admin_url }}"
+                                    style="
+                                        color: #24475b;
+                                        text-decoration: none;
+                                        font-weight: bold;
+                                    "
+                                >
+                                    {{ model.name }}
+                                </a>
+
+                                {% if model.add_url %}
+                                    <a
+                                        href="{{ model.add_url }}"
+                                        style="
+                                            color: #417690;
+                                            text-decoration: none;
+                                            white-space: nowrap;
+                                            font-size: 12px;
+                                        "
+                                    >
+                                        ＋ Añadir
+                                    </a>
+                                {% endif %}
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block sidebar %}
 {% endblock %}
