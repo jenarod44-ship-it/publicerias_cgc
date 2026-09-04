@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,42 +7,123 @@
     <title>Reporte de Servicios - Publicerias CGC</title>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background: #f5f5f5;
+        * {
+            box-sizing: border-box;
         }
 
-        .contenedor {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 24px;
+            color: #222;
+            background: #fff;
         }
 
         .encabezado {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
-        .filtros {
-            margin: 20px 0;
+        .encabezado img {
+            width: 150px;
+            height: auto;
+            margin-bottom: 8px;
+        }
+
+        .encabezado h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #24475b;
+        }
+
+        .encabezado h2 {
+            margin: 4px 0 0 0;
+            font-size: 18px;
+            font-weight: normal;
+            color: #444;
+        }
+
+        .periodo {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .barra-consulta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin: 18px 0;
+            padding: 14px;
+            border: 1px solid #d6d6d6;
+            border-radius: 6px;
+            background: #f8f8f8;
+        }
+
+        .barra-consulta label {
+            font-weight: bold;
+        }
+
+        .barra-consulta input {
+            padding: 7px 9px;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 4px;
+            background: #417690;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .boton:hover {
+            background: #31596d;
+        }
+
+        .resumen {
+            margin: 10px 0 16px 0;
+            padding: 10px 14px;
+            border-left: 4px solid #417690;
+            background: #f3f7f9;
+            font-size: 14px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 13px;
+            table-layout: auto;
         }
 
         th,
         td {
-            border: 1px solid #ddd;
-            padding: 7px;
+            border: 1px solid #bdbdbd;
+            padding: 6px 5px;
             vertical-align: top;
+            font-size: 12px;
         }
 
         th {
-            background: #eeeeee;
+            background: #417690;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f7f7f7;
         }
 
         .centro {
@@ -51,29 +134,104 @@
             padding: 20px;
             text-align: center;
             font-weight: bold;
+            border: 1px solid #ddd;
+            background: #f8f8f8;
+        }
+
+        @page {
+            size: letter landscape;
+            margin: 8mm;
+        }
+
+        @media print {
+            .no-imprimir {
+                display: none !important;
+            }
+
+            body {
+                margin: 0;
+            }
+
+            .encabezado {
+                margin-bottom: 10px;
+            }
+
+            .encabezado img {
+                width: 105px;
+            }
+
+            .encabezado h1 {
+                font-size: 18px;
+            }
+
+            .encabezado h2 {
+                font-size: 14px;
+            }
+
+            .periodo {
+                font-size: 10px;
+            }
+
+            .resumen {
+                margin: 6px 0 10px 0;
+                padding: 6px 8px;
+                font-size: 10px;
+            }
+
+            table {
+                width: 100%;
+                table-layout: auto;
+            }
+
+            th,
+            td {
+                padding: 3px 3px;
+                font-size: 8px;
+            }
+
+            thead {
+                display: table-header-group;
+            }
+
+            tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
         }
     </style>
 </head>
 
 <body>
 
-<div class="contenedor">
-
     <div class="encabezado">
-        <h1>Comunicadores Gráficos Creativos</h1>
-        <h2>Reporte de Servicios</h2>
+
+        <img
+            src="{% static 'core/img/logo_cgc.png' %}"
+            alt="Comunicadores Gráficos Creativos"
+        >
+
+        <h1>
+            Comunicadores Gráficos Creativos
+        </h1>
+
+        <h2>
+            Reporte de Servicios
+        </h2>
+
+        <div class="periodo">
+            Periodo:
+            {{ fecha_desde|date:"d/m/Y" }}
+            al
+            {{ fecha_hasta|date:"d/m/Y" }}
+        </div>
+
     </div>
 
-    <p>
-        <a href="{% url 'admin:index' %}">
-            🏠 Volver a Administración
-        </a>
-    </p>
 
-    <form method="get" class="filtros">
+    <form method="get" class="barra-consulta no-imprimir">
 
         <label for="desde">
-            <strong>Desde:</strong>
+            Desde:
         </label>
 
         <input
@@ -83,10 +241,8 @@
             value="{{ fecha_desde|date:'Y-m-d' }}"
         >
 
-        &nbsp;
-
         <label for="hasta">
-            <strong>Hasta:</strong>
+            Hasta:
         </label>
 
         <input
@@ -96,33 +252,52 @@
             value="{{ fecha_hasta|date:'Y-m-d' }}"
         >
 
-        <button type="submit">
+        <button
+            type="submit"
+            class="boton"
+        >
             Consultar
+        </button>
+
+    </form>
+
+
+    <div class="acciones no-imprimir">
+
+        <button
+            class="boton"
+            onclick="window.print()"
+        >
+            🖨️ Imprimir reporte
         </button>
 
         <a
             href="{% url 'core:exportar_reporte_servicios_excel' %}?desde={{ fecha_desde|date:'Y-m-d' }}&hasta={{ fecha_hasta|date:'Y-m-d' }}"
+            class="boton"
         >
             📊 Exportar a Excel
         </a>
 
-    </form>
+        <a
+            href="{% url 'admin:index' %}"
+            class="boton"
+        >
+            🏠 Volver a Administración
+        </a>
 
-    <p>
-        <strong>Periodo:</strong>
-        {{ fecha_desde|date:"d/m/Y" }}
-        al
-        {{ fecha_hasta|date:"d/m/Y" }}
+    </div>
 
-        &nbsp; | &nbsp;
 
+    <div class="resumen">
         <strong>Total de servicios:</strong>
         {{ total_servicios }}
-    </p>
+    </div>
+
 
     {% if servicios %}
 
         <table>
+
             <thead>
                 <tr>
                     <th>Fecha</th>
@@ -200,6 +375,7 @@
                 {% endfor %}
 
             </tbody>
+
         </table>
 
     {% else %}
@@ -209,8 +385,6 @@
         </div>
 
     {% endif %}
-
-</div>
 
 </body>
 </html>

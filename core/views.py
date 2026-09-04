@@ -870,18 +870,29 @@ def exportar_reporte_servicios_excel(request):
 
         fila += 1
 
-    hoja.cell(
-        fila + 1,
-        8,
-        "TOTAL SERVICIOS:",
-    ).font = Font(bold=True)
+    hoja.merge_cells(
+        start_row=fila + 1,
+        start_column=7,
+        end_row=fila + 1,
+        end_column=8,
+    )
 
-    hoja.cell(
+    celda_total_texto = hoja.cell(
+        fila + 1,
+        7,
+        "TOTAL SERVICIOS:",
+    )
+    celda_total_texto.font = Font(bold=True)
+    celda_total_texto.alignment = Alignment(horizontal="right")
+
+    celda_total_numero = hoja.cell(
         fila + 1,
         9,
         datos["total_servicios"],
-    ).font = Font(bold=True)
-
+    )
+    celda_total_numero.font = Font(bold=True)
+    celda_total_numero.alignment = Alignment(horizontal="center")
+    
     anchos = {
         "A": 13,
         "B": 30,
@@ -899,6 +910,22 @@ def exportar_reporte_servicios_excel(request):
 
     hoja.freeze_panes = "A6"
     hoja.auto_filter.ref = f"A5:I{fila - 1}"
+
+    # Configuración de impresión
+    hoja.page_setup.orientation = "landscape"
+    hoja.page_setup.paperSize = hoja.PAPERSIZE_LETTER
+
+    hoja.sheet_properties.pageSetUpPr.fitToPage = True
+    hoja.page_setup.fitToWidth = 1
+    hoja.page_setup.fitToHeight = 0
+
+    hoja.page_margins.left = 0.25
+    hoja.page_margins.right = 0.25
+    hoja.page_margins.top = 0.40
+    hoja.page_margins.bottom = 0.40
+
+    hoja.print_area = f"A1:I{fila + 1}"
+    hoja.print_options.horizontalCentered = True
 
     nombre_archivo = (
         f"reporte_servicios_"
