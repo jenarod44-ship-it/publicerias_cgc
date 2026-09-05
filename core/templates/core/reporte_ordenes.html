@@ -1,0 +1,458 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Órdenes de Trabajo - Publicerias CGC</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 24px;
+            color: #222;
+            background: #fff;
+        }
+
+        .encabezado {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .encabezado img {
+            width: 150px;
+            height: auto;
+            margin-bottom: 8px;
+        }
+
+        .encabezado h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #24475b;
+        }
+
+        .encabezado h2 {
+            margin: 4px 0 0 0;
+            font-size: 18px;
+            font-weight: normal;
+            color: #444;
+        }
+
+        .periodo {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .barra-consulta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin: 18px 0;
+            padding: 14px;
+            border: 1px solid #d6d6d6;
+            border-radius: 6px;
+            background: #f8f8f8;
+        }
+
+        .barra-consulta label {
+            font-weight: bold;
+        }
+
+        .barra-consulta input,
+        .barra-consulta select {
+            padding: 7px 9px;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 4px;
+            background: #417690;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .boton:hover {
+            background: #31596d;
+        }
+
+        .resumen {
+            margin: 10px 0 16px 0;
+            padding: 10px 14px;
+            border-left: 4px solid #417690;
+            background: #f3f7f9;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+
+        th,
+        td {
+            border: 1px solid #bdbdbd;
+            padding: 6px 5px;
+            vertical-align: top;
+            font-size: 11px;
+        }
+
+        th {
+            background: #417690;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f7f7f7;
+        }
+
+        .centro {
+            text-align: center;
+        }
+
+        .sin-ordenes {
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            background: #f8f8f8;
+        }
+
+        @page {
+            size: letter landscape;
+            margin: 7mm;
+        }
+
+        @media print {
+            .no-imprimir {
+                display: none !important;
+            }
+
+            body {
+                margin: 0;
+            }
+
+            .encabezado {
+                margin-bottom: 10px;
+            }
+
+            .encabezado img {
+                width: 105px;
+            }
+
+            .encabezado h1 {
+                font-size: 18px;
+            }
+
+            .encabezado h2 {
+                font-size: 14px;
+            }
+
+            .periodo {
+                font-size: 10px;
+            }
+
+            .resumen {
+                margin: 6px 0 10px 0;
+                padding: 6px 8px;
+                font-size: 10px;
+            }
+
+            table {
+                width: 100%;
+                table-layout: auto;
+            }
+
+            th,
+            td {
+                padding: 3px 3px;
+                font-size: 7px;
+            }
+
+            thead {
+                display: table-header-group;
+            }
+
+            tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="encabezado">
+
+        <img
+            src="{% static 'core/img/logo_cgc.png' %}"
+            alt="Comunicadores Gráficos Creativos"
+        >
+
+        <h1>
+            Comunicadores Gráficos Creativos
+        </h1>
+
+        <h2>
+            Reporte de Órdenes de Trabajo
+        </h2>
+
+        <div class="periodo">
+            Vigentes en el periodo:
+            {{ fecha_desde|date:"d/m/Y" }}
+            al
+            {{ fecha_hasta|date:"d/m/Y" }}
+        </div>
+
+    </div>
+
+
+    <form method="get" class="barra-consulta no-imprimir">
+
+        <label for="desde">
+            Desde:
+        </label>
+
+        <input
+            type="date"
+            id="desde"
+            name="desde"
+            value="{{ fecha_desde|date:'Y-m-d' }}"
+        >
+
+        <label for="hasta">
+            Hasta:
+        </label>
+
+        <input
+            type="date"
+            id="hasta"
+            name="hasta"
+            value="{{ fecha_hasta|date:'Y-m-d' }}"
+        >
+
+
+        <label for="ejecutivo">
+            Ejecutiva:
+        </label>
+
+        <select
+            id="ejecutivo"
+            name="ejecutivo"
+        >
+            <option value="">
+                Todas
+            </option>
+
+            {% for ejecutivo in ejecutivos %}
+                <option
+                    value="{{ ejecutivo.id }}"
+                    {% if ejecutivo_id == ejecutivo.id|stringformat:"s" %}
+                        selected
+                    {% endif %}
+                >
+                    {{ ejecutivo.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+
+
+        <label for="estado">
+            Estado:
+        </label>
+
+        <select
+            id="estado"
+            name="estado"
+        >
+            <option value="">
+                Todos
+            </option>
+
+            {% for valor, etiqueta in estados %}
+                <option
+                    value="{{ valor }}"
+                    {% if estado == valor %}
+                        selected
+                    {% endif %}
+                >
+                    {{ etiqueta }}
+                </option>
+            {% endfor %}
+        </select>
+
+
+        <button
+            type="submit"
+            class="boton"
+        >
+            Consultar
+        </button>
+
+    </form>
+
+
+    <div class="acciones no-imprimir">
+
+        <button
+            class="boton"
+            onclick="window.print()"
+        >
+            🖨️ Imprimir reporte
+        </button>
+
+        <a
+            href="{% url 'admin:index' %}"
+            class="boton"
+        >
+            🏠 Volver a Administración
+        </a>
+
+    </div>
+
+
+    <div class="resumen">
+        <strong>Total de órdenes:</strong>
+        {{ total_ordenes }}
+    </div>
+
+
+    {% if ordenes %}
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Folio</th>
+                    <th>Fecha orden</th>
+                    <th>Publicidad</th>
+                    <th>Ejecutiva</th>
+                    <th>Inicio</th>
+                    <th>Fin</th>
+                    <th>Días</th>
+                    <th>Turno</th>
+                    <th>Recorrido</th>
+                    <th>Perifoneo</th>
+                    <th>Referencia cliente</th>
+                    <th>Estado</th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for orden in ordenes %}
+
+                    <tr>
+
+                        <td class="centro">
+                            {{ orden.folio }}
+                        </td>
+
+                        <td class="centro">
+                            {{ orden.fecha_orden|date:"d/m/Y" }}
+                        </td>
+
+                        <td>
+                            {{ orden.publicidad }}
+                        </td>
+
+                        <td>
+                            {{ orden.ejecutivo }}
+                        </td>
+
+                        <td class="centro">
+                            {{ orden.fecha_inicio|date:"d/m/Y" }}
+                        </td>
+
+                        <td class="centro">
+                            {{ orden.fecha_fin|date:"d/m/Y" }}
+                        </td>
+
+                        <td>
+                            {% if orden.lunes %}Lu {% endif %}
+                            {% if orden.martes %}Ma {% endif %}
+                            {% if orden.miercoles %}Mi {% endif %}
+                            {% if orden.jueves %}Ju {% endif %}
+                            {% if orden.viernes %}Vi {% endif %}
+                            {% if orden.sabado %}Sa {% endif %}
+                            {% if orden.domingo %}Do{% endif %}
+                        </td>
+
+                        <td>
+                            {{ orden.turno }}
+                        </td>
+
+                        <td>
+                            {{ orden.recorrido }}
+                        </td>
+
+                        <td class="centro">
+                            {% if orden.perifoneo %}
+                                Sí
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if orden.referencia_cliente %}
+                                {{ orden.referencia_cliente }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td class="centro">
+                            {{ orden.get_estado_display }}
+                        </td>
+
+                        <td>
+                            {% if orden.observaciones %}
+                                {{ orden.observaciones }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <div class="sin-ordenes">
+            No hay órdenes vigentes en el periodo seleccionado.
+        </div>
+
+    {% endif %}
+
+</body>
+</html>

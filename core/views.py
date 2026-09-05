@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ServicioDespachoForm
 from .forms import ReposicionForm, ServicioDespachoForm
-from .models import Servicio, TarifaChofer, OrdenTrabajo
+from .models import Servicio, TarifaChofer, OrdenTrabajo, Ejecutivo
 from django.db import models
 from django.http import HttpResponse
 
@@ -683,6 +683,56 @@ def obtener_datos_reporte_servicios(fecha_desde, fecha_hasta):
         "servicios": servicios,
         "total_servicios": servicios.count(),
     }
+
+@login_required
+@user_passes_test(puede_ver_reportes)
+def reporte_ordenes(request):
+    fecha_desde_texto = request.GET.get("desde")
+    fecha_hasta_texto = request.GET.get("hasta")
+    ejecutivo_id = request.GET.get("ejecutivo")
+    estado = request.GET.get("estado")
+
+    hoy = timezone.localdate()
+
+    try:
+        fecha_desde = (
+            datetime.strptime(fecha_desde_texto, "%Y-%m-%d").date()
+            if fecha_desde_texto
+            else hoy
+        )
+    except ValueError:
+        fecha_desde = hoy
+
+    try:
+        fecha_hasta = (
+            datetime.strptime(fecha_hasta_texto, "%Y-%m-%d").date()
+            if fecha_hasta_texto
+            else fecha_desde
+        )
+    except ValueError:
+        fecha_hasta = fecha_desde
+
+    if fecha_hasta < fecha_desde:
+        fecha_hasta = fecha_desde
+
+    contexto = obtener_datos_reporte_ordenes(
+        fecha_desde,
+        fecha_hasta,
+        ejecutivo_id=ejecutivo_id,
+        estado=estado,
+    )
+
+    contexto["ejecutivos"] = Ejecutivo.objects.filter(
+        activo=True
+    ).order_by("nombre")
+
+    contexto["estados"] = OrdenTrabajo.ESTADOS
+
+    return render(
+        request,
+        "core/reporte_ordenes.html",
+        contexto,
+    )
 
 def obtener_datos_reporte_ordenes(
     fecha_desde,
