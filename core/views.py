@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ServicioDespachoForm
 from .forms import ReposicionForm, ServicioDespachoForm
-from .models import Servicio, TarifaChofer
+from .models import Servicio, TarifaChofer, OrdenTrabajo
 from django.db import models
 from django.http import HttpResponse
 
@@ -683,6 +683,51 @@ def obtener_datos_reporte_servicios(fecha_desde, fecha_hasta):
         "servicios": servicios,
         "total_servicios": servicios.count(),
     }
+
+def obtener_datos_reporte_ordenes(
+    fecha_desde,
+    fecha_hasta,
+    ejecutivo_id=None,
+    estado=None,
+):
+    ordenes = (
+        OrdenTrabajo.objects
+        .filter(
+            fecha_inicio__lte=fecha_hasta,
+            fecha_fin__gte=fecha_desde,
+        )
+        .select_related(
+            "publicidad",
+            "ejecutivo",
+            "turno",
+        )
+    )
+
+    if ejecutivo_id:
+        ordenes = ordenes.filter(
+            ejecutivo_id=ejecutivo_id
+        )
+
+    if estado:
+        ordenes = ordenes.filter(
+            estado=estado
+        )
+
+    ordenes = ordenes.order_by(
+        "ejecutivo__nombre",
+        "fecha_inicio",
+        "folio",
+    )
+
+    return {
+        "fecha_desde": fecha_desde,
+        "fecha_hasta": fecha_hasta,
+        "ejecutivo_id": ejecutivo_id,
+        "estado": estado,
+        "ordenes": ordenes,
+        "total_ordenes": ordenes.count(),
+    }
+
 @login_required
 @user_passes_test(puede_ver_reportes)
 def reporte_servicios(request):
@@ -892,7 +937,7 @@ def exportar_reporte_servicios_excel(request):
     )
     celda_total_numero.font = Font(bold=True)
     celda_total_numero.alignment = Alignment(horizontal="center")
-    
+
     anchos = {
         "A": 13,
         "B": 30,
