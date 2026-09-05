@@ -1043,7 +1043,277 @@ def exportar_reporte_servicios_excel(request):
 
     return respuesta
 
+@login_required
+@user_passes_test(puede_ver_reportes)
+def exportar_reporte_ordenes_excel(request):
+    fecha_desde_texto = request.GET.get("desde")
+    fecha_hasta_texto = request.GET.get("hasta")
+    ejecutivo_id = request.GET.get("ejecutivo")
+    estado = request.GET.get("estado")
 
+    hoy = timezone.localdate()
+
+    try:
+        fecha_desde = (
+            datetime.strptime(fecha_desde_texto, "%Y-%m-%d").date()
+            if fecha_desde_texto
+            else hoy
+        )
+    except ValueError:
+        fecha_desde = hoy
+
+    try:
+        fecha_hasta = (
+            datetime.strptime(fecha_hasta_texto, "%Y-%m-%d").date()
+            if fecha_hasta_texto
+            else fecha_desde
+        )
+    except ValueError:
+        fecha_hasta = fecha_desde
+
+    if fecha_hasta < fecha_desde:
+        fecha_hasta = fecha_desde
+
+    datos = obtener_datos_reporte_ordenes(
+        fecha_desde,
+        fecha_hasta,
+        ejecutivo_id=ejecutivo_id,
+        estado=estado,
+    )
+
+    ordenes = datos["ordenes"]
+
+    libro = Workbook()
+    hoja = libro.active
+    hoja.title = "Ordenes de trabajo"
+
+    hoja.merge_cells("A1:M1")
+    hoja["A1"] = "Comunicadores Gráficos Creativos"
+    hoja["A1"].font = Font(bold=True, size=14)
+    hoja["A1"].alignment = Alignment(horizontal="center")
+
+    hoja.merge_cells("A2:M2")
+    hoja["A2"] = "Reporte de Órdenes de Trabajo"
+    hoja["A2"].font = Font(bold=True, size=12)
+    hoja["A2"].alignment = Alignment(horizontal="center")
+
+    hoja.merge_cells("A3:M3")
+    hoja["A3"] = (
+        f"Vigentes en el periodo: "
+        f"{fecha_desde.strftime('%d/%m/%Y')} "
+        f"al {fecha_hasta.strftime('%d/%m/%Y')}"
+    )
+    hoja["A3"].alignment = Alignment(horizontal="center")
+
+    encabezados = [
+        "Folio",
+        "Fecha orden",
+        "Publicidad",
+        "Ejecutiva",
+        "Inicio",
+        "Fin",
+        "Días",
+        "Turno",
+        "Recorrido",
+        "Perifoneo",
+        "Referencia cliente",
+        "Estado",
+        "Observaciones",
+    ]
+
+    for columna, encabezado in enumerate(encabezados, start=1):
+        celda = hoja.cell(
+            row=5,
+            column=columna,
+            value=encabezado,
+        )
+        celda.font = Font(bold=True)
+        celda.alignment = Alignment(horizontal="center")
+
+    fila = 6
+
+    for orden in ordenes:
+        hoja.cell(
+            fila,
+            1,
+            orden.folio,
+        )
+
+        celda_fecha_orden = hoja.cell(
+            fila,
+            2,
+            orden.fecha_orden,
+        )
+        celda_fecha_orden.number_format = "dd/mm/yyyy"
+
+        hoja.cell(
+            fila,
+            3,
+            str(orden.publicidad),
+        )
+
+        hoja.cell(
+            fila,
+            4,
+            str(orden.ejecutivo),
+        )
+
+        celda_inicio = hoja.cell(
+            fila,
+            5,
+            orden.fecha_inicio,
+        )
+        celda_inicio.number_format = "dd/mm/yyyy"
+
+        celda_fin = hoja.cell(
+            fila,
+            6,
+            orden.fecha_fin,
+        )
+        celda_fin.number_format = "dd/mm/yyyy"
+
+        dias = []
+
+        if orden.lunes:
+            dias.append("Lu")
+        if orden.martes:
+            dias.append("Ma")
+        if orden.miercoles:
+            dias.append("Mi")
+        if orden.jueves:
+            dias.append("Ju")
+        if orden.viernes:
+            dias.append("Vi")
+        if orden.sabado:
+            dias.append("Sa")
+        if orden.domingo:
+            dias.append("Do")
+
+        hoja.cell(
+            fila,
+            7,
+            ", ".join(dias),
+        )
+
+        hoja.cell(
+            fila,
+            8,
+            str(orden.turno),
+        )
+
+        hoja.cell(
+            fila,
+            9,
+            orden.recorrido,
+        )
+
+        hoja.cell(
+            fila,
+            10,
+            "Sí" if orden.perifoneo else "No",
+        )
+
+        hoja.cell(
+            fila,
+            11,
+            orden.referencia_cliente or "",
+        )
+
+        hoja.cell(
+            fila,
+            12,
+            orden.get_estado_display(),
+        )
+
+        hoja.cell(
+            fila,
+            13,
+            orden.observaciones or "",
+        )
+
+        fila += 1
+
+    hoja.merge_cells(
+        start_row=fila + 1,
+        start_column=11,
+        end_row=fila + 1,
+        end_column=12,
+    )
+
+    celda_total_texto = hoja.cell(
+        fila + 1,
+        11,
+        "TOTAL ÓRDENES:",
+    )
+    celda_total_texto.font = Font(bold=True)
+    celda_total_texto.alignment = Alignment(horizontal="right")
+
+    celda_total_numero = hoja.cell(
+        fila + 1,
+        13,
+        datos["total_ordenes"],
+    )
+    celda_total_numero.font = Font(bold=True)
+    celda_total_numero.alignment = Alignment(horizontal="center")
+
+    anchos = {
+        "A": 14,
+        "B": 14,
+        "C": 28,
+        "D": 22,
+        "E": 14,
+        "F": 14,
+        "G": 22,
+        "H": 20,
+        "I": 40,
+        "J": 12,
+        "K": 28,
+        "L": 16,
+        "M": 40,
+    }
+
+    for columna, ancho in anchos.items():
+        hoja.column_dimensions[columna].width = ancho
+
+    hoja.freeze_panes = "A6"
+    hoja.auto_filter.ref = f"A5:M{fila - 1}"
+
+    # Configuración de impresión
+    hoja.page_setup.orientation = "landscape"
+    hoja.page_setup.paperSize = hoja.PAPERSIZE_LETTER
+
+    hoja.sheet_properties.pageSetUpPr.fitToPage = True
+    hoja.page_setup.fitToWidth = 1
+    hoja.page_setup.fitToHeight = 0
+
+    hoja.page_margins.left = 0.25
+    hoja.page_margins.right = 0.25
+    hoja.page_margins.top = 0.40
+    hoja.page_margins.bottom = 0.40
+
+    hoja.print_area = f"A1:M{fila + 1}"
+    hoja.print_options.horizontalCentered = True
+
+    nombre_archivo = (
+        f"reporte_ordenes_"
+        f"{fecha_desde.strftime('%Y%m%d')}_"
+        f"{fecha_hasta.strftime('%Y%m%d')}.xlsx"
+    )
+
+    respuesta = HttpResponse(
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
+    )
+
+    respuesta["Content-Disposition"] = (
+        f'attachment; filename="{nombre_archivo}"'
+    )
+
+    libro.save(respuesta)
+
+    return respuesta
 @login_required
 @user_passes_test(puede_ver_dashboard)
 def dashboard_gerencial(request):

@@ -57,7 +57,13 @@ urlpatterns = [
         views.reporte_ordenes,
         name="reporte_ordenes",
     ),
-    
+
+        path(
+        "reportes/ordenes/excel/",
+        views.exportar_reporte_ordenes_excel,
+        name="exportar_reporte_ordenes_excel",
+    ),
+
     path(
         "dashboard/",
         views.dashboard_gerencial,
