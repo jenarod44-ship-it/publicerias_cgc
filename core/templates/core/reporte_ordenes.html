@@ -220,39 +220,14 @@
             Reporte de Órdenes de Trabajo
         </h2>
 
-        <div class="periodo">
-            Vigentes en el periodo:
-            {{ fecha_desde|date:"d/m/Y" }}
-            al
-            {{ fecha_hasta|date:"d/m/Y" }}
-        </div>
+        
 
     </div>
 
 
     <form method="get" class="barra-consulta no-imprimir">
 
-        <label for="desde">
-            Desde:
-        </label>
-
-        <input
-            type="date"
-            id="desde"
-            name="desde"
-            value="{{ fecha_desde|date:'Y-m-d' }}"
-        >
-
-        <label for="hasta">
-            Hasta:
-        </label>
-
-        <input
-            type="date"
-            id="hasta"
-            name="hasta"
-            value="{{ fecha_hasta|date:'Y-m-d' }}"
-        >
+       
 
 
         <label for="ejecutivo">
@@ -366,6 +341,7 @@
                     <th>Referencia cliente</th>
                     <th>Estado</th>
                     <th>Observaciones</th>
+                    <th>Instrucciones</th>
                 </tr>
             </thead>
 
@@ -440,6 +416,19 @@
                         <td>
                             {% if orden.observaciones %}
                                 {{ orden.observaciones }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td class="centro">
+                            {% if orden.estado == "ACTIVA" %}
+                                <a
+                                    href="{% url 'core:instrucciones_orden' orden.pk %}"
+                                    class="boton"
+                                >
+                                    Ver / Imprimir
+                                </a>
                             {% else %}
                                 -
                             {% endif %}

@@ -683,41 +683,30 @@ def obtener_datos_reporte_servicios(fecha_desde, fecha_hasta):
         "servicios": servicios,
         "total_servicios": servicios.count(),
     }
+    
+@login_required
+@user_passes_test(puede_ver_reportes)
+def instrucciones_orden(request, pk):
+    orden = get_object_or_404(
+        OrdenTrabajo,
+        pk=pk,
+    )
+
+    return render(
+        request,
+        "core/instrucciones_orden.html",
+        {
+            "orden": orden,
+        },
+    )
 
 @login_required
 @user_passes_test(puede_ver_reportes)
 def reporte_ordenes(request):
-    fecha_desde_texto = request.GET.get("desde")
-    fecha_hasta_texto = request.GET.get("hasta")
     ejecutivo_id = request.GET.get("ejecutivo")
     estado = request.GET.get("estado")
 
-    hoy = timezone.localdate()
-
-    try:
-        fecha_desde = (
-            datetime.strptime(fecha_desde_texto, "%Y-%m-%d").date()
-            if fecha_desde_texto
-            else hoy
-        )
-    except ValueError:
-        fecha_desde = hoy
-
-    try:
-        fecha_hasta = (
-            datetime.strptime(fecha_hasta_texto, "%Y-%m-%d").date()
-            if fecha_hasta_texto
-            else fecha_desde
-        )
-    except ValueError:
-        fecha_hasta = fecha_desde
-
-    if fecha_hasta < fecha_desde:
-        fecha_hasta = fecha_desde
-
     contexto = obtener_datos_reporte_ordenes(
-        fecha_desde,
-        fecha_hasta,
         ejecutivo_id=ejecutivo_id,
         estado=estado,
     )
@@ -734,23 +723,15 @@ def reporte_ordenes(request):
         contexto,
     )
 
+
 def obtener_datos_reporte_ordenes(
-    fecha_desde,
-    fecha_hasta,
     ejecutivo_id=None,
     estado=None,
 ):
-    ordenes = (
-        OrdenTrabajo.objects
-        .filter(
-            fecha_inicio__lte=fecha_hasta,
-            fecha_fin__gte=fecha_desde,
-        )
-        .select_related(
-            "publicidad",
-            "ejecutivo",
-            "turno",
-        )
+    ordenes = OrdenTrabajo.objects.select_related(
+        "publicidad",
+        "ejecutivo",
+        "turno",
     )
 
     if ejecutivo_id:
@@ -770,13 +751,13 @@ def obtener_datos_reporte_ordenes(
     )
 
     return {
-        "fecha_desde": fecha_desde,
-        "fecha_hasta": fecha_hasta,
         "ejecutivo_id": ejecutivo_id,
         "estado": estado,
         "ordenes": ordenes,
         "total_ordenes": ordenes.count(),
     }
+
+
 
 @login_required
 @user_passes_test(puede_ver_reportes)

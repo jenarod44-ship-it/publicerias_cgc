@@ -57,6 +57,12 @@ urlpatterns = [
         views.reporte_ordenes,
         name="reporte_ordenes",
     ),
+    
+    path(
+        "reportes/ordenes/<int:pk>/instrucciones/",
+        views.instrucciones_orden,
+        name="instrucciones_orden",
+    ),
 
         path(
         "reportes/ordenes/excel/",

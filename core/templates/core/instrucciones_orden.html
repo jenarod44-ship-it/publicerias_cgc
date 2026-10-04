@@ -1,0 +1,225 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Instrucciones de Servicio - {{ orden.folio }}</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #222;
+            background: #fff;
+            margin: 0;
+            padding: 25px;
+        }
+
+        .hoja {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 28px 38px;
+            border: 1px solid #ccc;
+        }
+
+        .encabezado {
+            text-align: center;
+            border-bottom: 2px solid #417690;
+            padding-bottom: 15px;
+            margin-bottom: 22px;
+        }
+
+        .encabezado img {
+            width: 140px;
+            height: auto;
+        }
+
+        .encabezado h1 {
+            margin: 8px 0 3px;
+            font-size: 22px;
+            color: #24475b;
+        }
+
+        .encabezado h2 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+
+        .datos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 30px;
+        }
+
+        .campo {
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .campo strong {
+            color: #24475b;
+        }
+
+        .ancho-completo {
+            grid-column: 1 / -1;
+        }
+
+        .firma {
+            width: 300px;
+            margin: 70px auto 10px;
+            padding-top: 7px;
+            border-top: 1px solid #000;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        @page {
+            size: letter portrait;
+            margin: 12mm;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .hoja {
+                max-width: none;
+                border: none;
+                padding: 0;
+            }
+
+            .no-imprimir {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="no-imprimir" style="max-width: 850px; margin: 0 auto 12px; text-align: right;">
+        <button
+            type="button"
+            onclick="window.print()"
+            style="
+                padding: 9px 16px;
+                border: none;
+                border-radius: 4px;
+                background: #417690;
+                color: white;
+                cursor: pointer;
+                font-size: 14px;
+            "
+        >
+            🖨️ Imprimir
+        </button>
+    </div>
+
+    <div class="hoja">
+
+        <div class="encabezado">
+            <img
+                src="{% static 'core/img/logo_cgc.png' %}"
+                alt="Comunicadores Gráficos Creativos"
+            >
+
+            <h1>Comunicadores Gráficos Creativos</h1>
+            <h2>INSTRUCCIONES DE SERVICIO</h2>
+        </div>
+
+        <div class="datos">
+
+            <div class="campo">
+                <strong>Orden:</strong>
+                {{ orden.folio }}
+            </div>
+
+            <div class="campo">
+                <strong>Vigencia:</strong>
+                {{ orden.fecha_inicio|date:"d/m/Y" }}
+                al
+                {{ orden.fecha_fin|date:"d/m/Y" }}
+            </div>
+
+            <div class="campo ancho-completo">
+                <strong>Días de recorrido:</strong>
+                {% if orden.lunes %}Lunes {% endif %}
+                {% if orden.martes %}Martes {% endif %}
+                {% if orden.miercoles %}Miércoles {% endif %}
+                {% if orden.jueves %}Jueves {% endif %}
+                {% if orden.viernes %}Viernes {% endif %}
+                {% if orden.sabado %}Sábado {% endif %}
+                {% if orden.domingo %}Domingo{% endif %}
+            </div>
+
+            <div class="campo">
+                <strong>Turno:</strong>
+                {{ orden.turno }}
+            </div>
+
+            <div class="campo">
+                <strong>Publicidad:</strong>
+                {{ orden.publicidad }}
+            </div>
+
+            <div class="campo">
+                <strong>Ejecutivo:</strong>
+                {{ orden.ejecutivo }}
+            </div>
+
+            <div class="campo">
+                <strong>Camión:</strong>
+                {{ orden.camion }}
+            </div>
+
+            <div class="campo ancho-completo">
+                <strong>Recorrido:</strong>
+                {{ orden.recorrido }}
+            </div>
+
+            <div class="campo">
+                <strong>Perifoneo:</strong>
+                {% if orden.perifoneo %}Sí{% else %}No{% endif %}
+            </div>
+
+            <div class="campo">
+                <strong>Firma de bitácora:</strong>
+                {% if orden.firma_bitacora %}Sí{% else %}No{% endif %}
+            </div>
+
+            <div class="campo">
+                <strong>Evidencia al Ejecutivo:</strong>
+                {% if orden.evidencia_ejecutivo %}Sí{% else %}No{% endif %}
+            </div>
+
+            <div class="campo">
+                <strong>Evidencia a Choferes:</strong>
+                {% if orden.evidencia_grupo_choferes %}Sí{% else %}No{% endif %}
+            </div>
+
+            <div class="campo ancho-completo">
+                <strong>Referencia del cliente:</strong>
+                {{ orden.referencia_cliente|default:"-" }}
+            </div>
+
+            <div class="campo ancho-completo">
+                <strong>Observaciones:</strong>
+                {{ orden.observaciones|default:"-" }}
+            </div>
+
+        </div>
+
+        <div class="firma">
+            Firma de recibido del chofer
+        </div>
+
+    </div>
+
+</body>
+</html>
